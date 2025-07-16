@@ -5,6 +5,7 @@ import { LinkedInUrlFormatter } from './linkedinUrlFormatter';
 interface LinkedInSearchParams {
   businessModels: string[];
   keywords: string;
+  additionalCompanyIds?: string[]; // New parameter for additional company IDs
 }
 
 export class LinkedInSearchService {
@@ -12,30 +13,45 @@ export class LinkedInSearchService {
    * Perform LinkedIn search by fetching IDs and opening search results
    */
   static async performLinkedInSearch(params: LinkedInSearchParams): Promise<void> {
-    const { businessModels, keywords } = params;
+    const { businessModels, keywords, additionalCompanyIds = [] } = params;
 
-    if (businessModels.length === 0) {
-      throw new Error('Please select at least one business model');
+    if (businessModels.length === 0 && additionalCompanyIds.length === 0) {
+      throw new Error('Please select at least one business model or company');
     }
 
-    // Prepare API request
-    const businessModelNames = businessModels.join(', ');
-    const request: LinkedInIdsRequest = {
-      businessModels: businessModelNames
-    };
+    let allLinkedInIds: string[] = [];
 
-    console.log('Fetching LinkedIn IDs for business models:', businessModelNames);
-    
-    // Fetch LinkedIn IDs from API
-    const response = await apiService.getLinkedInIds(request);
-    
-    console.log('LinkedIn IDs received:', response.linkedInIds);
-    console.log('Total count:', response.count);
-    console.log('Business model:', response.businessModel);
+    // Fetch LinkedIn IDs from business models if any are selected
+    if (businessModels.length > 0) {
+      // Prepare API request
+      const businessModelNames = businessModels.join(', ');
+      const request: LinkedInIdsRequest = {
+        businessModels: businessModelNames
+      };
+
+      console.log('Fetching LinkedIn IDs for business models:', businessModelNames);
+      
+      // Fetch LinkedIn IDs from API
+      const response = await apiService.getLinkedInIds(request);
+      
+      console.log('LinkedIn IDs received from business models:', response.linkedInIds);
+      console.log('Total count:', response.count);
+      console.log('Business model:', response.businessModel);
+
+      allLinkedInIds = [...response.linkedInIds];
+    }
+
+    // Add additional company IDs
+    if (additionalCompanyIds.length > 0) {
+      console.log('Adding additional company LinkedIn IDs:', additionalCompanyIds);
+      allLinkedInIds = [...allLinkedInIds, ...additionalCompanyIds];
+    }
+
+    console.log('Combined LinkedIn IDs:', allLinkedInIds);
 
     // Format and open LinkedIn search
     const searchParams = {
-      linkedInIds: response.linkedInIds,
+      linkedInIds: allLinkedInIds,
       keywords: keywords.trim() || '' // Use empty string if no keywords
     };
 
@@ -46,9 +62,9 @@ export class LinkedInSearchService {
   /**
    * Validate search parameters
    */
-  static validateSearchParams(businessModels: string[]): string | null {
-    if (businessModels.length === 0) {
-      return 'Please select at least one business model';
+  static validateSearchParams(businessModels: string[], additionalCompanyIds: string[] = []): string | null {
+    if (businessModels.length === 0 && additionalCompanyIds.length === 0) {
+      return 'Please select at least one business model or company';
     }
     return null;
   }

@@ -20,4 +20,15 @@ export interface LinkedInIdsResponse {
 export interface BusinessModel {
   id: string;
   name: string;
+}
+
+// Company Interface
+export interface Company {
+  company_name: string;
+  linkedin_id: string;
+}
+
+export interface AllCompaniesResponse {
+  companies: Company[];
+  count: number;
 } 

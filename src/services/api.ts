@@ -2,7 +2,8 @@ import { getApiUrl } from '../config';
 import {
   BusinessModelsResponse,
   LinkedInIdsRequest,
-  LinkedInIdsResponse
+  LinkedInIdsResponse,
+  AllCompaniesResponse
 } from '../types/api';
 
 class ApiService {
@@ -50,6 +51,12 @@ class ApiService {
     
     
     return this.makeRequest<LinkedInIdsResponse>(`linkedInIds?${queryParams}`, {
+      method: 'GET',
+    });
+  }
+
+  async getAllCompanies(): Promise<AllCompaniesResponse> {
+    return this.makeRequest<AllCompaniesResponse>('allCompaniesLinkedinIds', {
       method: 'GET',
     });
   }

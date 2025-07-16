@@ -10,9 +10,13 @@ export const useLinkedInSearch = (params?: UseLinkedInSearchParams) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  const performSearch = async (businessModels: string[], keywords: string) => {
+  const performSearch = async (
+    businessModels: string[], 
+    keywords: string, 
+    additionalCompanyIds: string[] = []
+  ) => {
     // Validate parameters
-    const validationError = LinkedInSearchService.validateSearchParams(businessModels);
+    const validationError = LinkedInSearchService.validateSearchParams(businessModels, additionalCompanyIds);
     
     if (validationError) {
       const errorMessage = validationError;
@@ -27,7 +31,8 @@ export const useLinkedInSearch = (params?: UseLinkedInSearchParams) => {
 
       await LinkedInSearchService.performLinkedInSearch({
         businessModels,
-        keywords
+        keywords,
+        additionalCompanyIds
       });
 
       params?.onSuccess?.();
