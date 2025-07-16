@@ -1,34 +1,9 @@
 import { getApiUrl } from '../config';
-
-interface SearchCompaniesRequest {
-  keywords: string;
-  businessModel: string;
-}
-
-interface SearchCompaniesResponse {
-  companyIds: string[];
-  // Add other response fields as needed
-}
-
-interface BusinessModel {
-  id: string;
-  name: string;
-}
-
-interface BusinessModelsResponse {
-  businessModels: string[];
-  count: number;
-}
-
-interface LinkedInIdsRequest {
-  businessModels: string;
-}
-
-interface LinkedInIdsResponse {
-  businessModel: string; // Single string like "Bank, Asset Manager"
-  linkedInIds: string[];
-  count: number;
-}
+import {
+  BusinessModelsResponse,
+  LinkedInIdsRequest,
+  LinkedInIdsResponse
+} from '../types/api';
 
 class ApiService {
   private async makeRequest<T>(
@@ -62,13 +37,6 @@ class ApiService {
     return data;
   }
 
-  async searchCompanies(request: SearchCompaniesRequest): Promise<SearchCompaniesResponse> {
-    return this.makeRequest<SearchCompaniesResponse>('searchCompanies', {
-      method: 'POST',
-      body: JSON.stringify(request),
-    });
-  }
-
   async getBusinessModels(): Promise<BusinessModelsResponse> {
     return this.makeRequest<BusinessModelsResponse>('businessModels', {
       method: 'GET',
@@ -87,12 +55,4 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService();
-export type { 
-  SearchCompaniesRequest, 
-  SearchCompaniesResponse, 
-  BusinessModel, 
-  BusinessModelsResponse,
-  LinkedInIdsRequest,
-  LinkedInIdsResponse
-}; 
+export const apiService = new ApiService(); 

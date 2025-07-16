@@ -1,48 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { apiService, BusinessModel, BusinessModelsResponse, LinkedInIdsRequest } from '../services/api';
-import { ERROR_MESSAGES } from '../config';
-import { LinkedInUrlFormatter } from '../utils/linkedinUrlFormatter';
+import React, { useState } from 'react';
+import { BusinessModel } from '../types/api';
+import { useBusinessModels } from '../hooks/useBusinessModels';
+import { useLinkedInSearch } from '../hooks/useLinkedInSearch';
 
 const SearchComponent: React.FC = () => {
   const [keywords, setKeywords] = useState<string>('');
   const [selectedBusinessModels, setSelectedBusinessModels] = useState<BusinessModel[]>([]);
-  const [businessModels, setBusinessModels] = useState<BusinessModel[]>([]);
-  const [filteredModels, setFilteredModels] = useState<BusinessModel[]>([]);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Load business models from API
-  useEffect(() => {
-    const loadBusinessModels = async () => {
-      try {
-        setLoading(true);
-        setError('');
-        console.log('Fetching business models from API...');
-        const models = await apiService.getBusinessModels();
-        
-        // Transform the API response to match expected format
-        const transformedModels = models.businessModels.map((name: string, index: number) => ({
-          id: (index + 1).toString(),
-          name: name
-        }));
-        
-        setBusinessModels(transformedModels);
-        setFilteredModels(transformedModels);
-      } catch (err) {
-        console.error('Failed to load business models:', err);
-        setError(ERROR_MESSAGES.LOAD_BUSINESS_MODELS);
-        // Don't set any business models if API fails
-        setBusinessModels([]);
-        setFilteredModels([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Use custom hooks
+  const {
+    businessModels,
+    filteredModels,
+    loading,
+    error,
+    filterBusinessModels
+  } = useBusinessModels();
 
-    loadBusinessModels();
-  }, []);
+  const {
+    loading: linkedInLoading,
+    error: linkedInError,
+    performSearch,
+    clearError
+  } = useLinkedInSearch({
+    onError: (error) => alert(error)
+  });
 
   const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKeywords(e.target.value);
@@ -51,12 +34,8 @@ const SearchComponent: React.FC = () => {
   const handleBusinessModelSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
     setSearchTerm(searchTerm);
-    
-    const filtered = businessModels.filter(model =>
-      model.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !selectedBusinessModels.some(selected => selected.id === model.id)
-    );
-    setFilteredModels(filtered);
+
+    filterBusinessModels(searchTerm);
     setShowDropdown(true);
   };
 
@@ -70,71 +49,11 @@ const SearchComponent: React.FC = () => {
     setSelectedBusinessModels(prev => prev.filter(model => model.id !== modelId));
   };
 
-  const handleGetLinkedInIds = async () => {
-    if (selectedBusinessModels.length === 0) {
-      alert('Please select at least one business model');
-      return;
-    }
-
-    // Keywords can be empty - no validation needed
-
-    try {
-      setLoading(true);
-      setError('');
-
-      const businessModelNames = selectedBusinessModels.map(model => model.name).join(', ');
-      const request: LinkedInIdsRequest = {
-        businessModels: businessModelNames
-      };
-
-      console.log('Fetching LinkedIn IDs for business models:', businessModelNames);
-      const response = await apiService.getLinkedInIds(request);
-      // Format and open LinkedIn search
-      const searchParams = {
-        linkedInIds: response.linkedInIds,
-        keywords: keywords.trim() || '' // Use empty string if no keywords
-      };
-
-      console.log('Opening LinkedIn search with params:', searchParams);
-      LinkedInUrlFormatter.openLinkedInSearch(searchParams);
-
-    } catch (error) {
-      console.error('Error fetching LinkedIn IDs:', error);
-      setError('Error fetching LinkedIn IDs. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearchOnLinkedIn = async () => {
-    if (!keywords || selectedBusinessModels.length === 0) {
-      alert(ERROR_MESSAGES.MISSING_INPUTS);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await apiService.searchCompanies({
-        keywords: keywords,
-        businessModel: selectedBusinessModels.map(model => model.name).join(', '),
-      });
-
-      const companyIds = response.companyIds;
-
-      // TODO: Replace with actual URL formatting logic
-      const businessModelNames = selectedBusinessModels.map(model => model.name).join(', ');
-      const linkedInUrl = `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(keywords)}&businessModel=${encodeURIComponent(businessModelNames)}`;
-      
-      // Open LinkedIn URL in new tab
-      window.open(linkedInUrl, '_blank');
-    } catch (error) {
-      console.error('Error searching companies:', error);
-      setError(ERROR_MESSAGES.SEARCH_COMPANIES);
-    } finally {
-      setLoading(false);
-    }
+  const handleLinkedInSearch = async () => {
+    await performSearch(
+      selectedBusinessModels.map(model => model.name),
+      keywords
+    );
   };
 
   return (
@@ -237,18 +156,18 @@ const SearchComponent: React.FC = () => {
       {selectedBusinessModels.length > 0 && (
         <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
           <button 
-            onClick={handleGetLinkedInIds}
-            disabled={loading}
+            onClick={handleLinkedInSearch}
+            disabled={loading || linkedInLoading}
             style={{
               padding: '8px 16px',
               backgroundColor: '#4caf50',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer'
+              cursor: (loading || linkedInLoading) ? 'not-allowed' : 'pointer'
             }}
           >
-            {loading ? 'Fetching...' : 'Search LinkedIn People'}
+            {(loading || linkedInLoading) ? 'Fetching...' : 'Search LinkedIn People'}
           </button>
         </div>
       )}
