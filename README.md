@@ -6,6 +6,7 @@ A React TypeScript frontend for searching companies on LinkedIn based on keyword
 
 - Keyword search input
 - Searchable business model dropdown
+- Custom company integration
 - API integration for company search
 - LinkedIn URL generation and navigation
 - Environment-based configuration (dev, test, prod)

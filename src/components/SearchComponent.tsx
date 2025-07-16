@@ -282,7 +282,7 @@ const SearchComponent: React.FC = () => {
               cursor: (businessModelsLoading || companiesLoading || linkedInLoading) ? 'not-allowed' : 'pointer'
             }}
           >
-            {(businessModelsLoading || companiesLoading || linkedInLoading) ? 'Fetching...' : 'Search LinkedIn People'}
+            {(businessModelsLoading || companiesLoading || linkedInLoading) ? 'Fetching...' : 'Search LinkedIn'}
           </button>
         </div>
       )}

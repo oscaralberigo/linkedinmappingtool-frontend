@@ -4,7 +4,7 @@ import SearchComponent from './components/SearchComponent';
 function App() {
   return (
     <div>
-      <h1>LinkedIn Mapping Tool</h1>
+      <h1>LS LinkedIn Search</h1>
       <SearchComponent />
     </div>
   );
