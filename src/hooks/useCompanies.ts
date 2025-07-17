@@ -18,8 +18,6 @@ export const useCompanies = () => {
       setLoading(true);
       setError(null);
       const response = await apiService.getAllCompanies();
-      console.log('Companies API response:', response);
-      console.log('Companies array:', response.companies);
       
       // Validate the response structure
       if (!response.companies || !Array.isArray(response.companies)) {

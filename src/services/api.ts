@@ -16,19 +16,30 @@ class ApiService {
     const baseUrl = getApiUrl(endpointKey as any);
     const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
     
-    
+    // Get API key from environment
+    const apiKey = process.env.REACT_APP_API_KEY;
+
+    // Ensure headers is a plain object with string keys and values
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers
+        ? Object.fromEntries(
+            Object.entries(options.headers).map(([k, v]) => [k, String(v)])
+          )
+        : {}),
+    };
+    // Add API key header if available
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
     const defaultOptions: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     };
 
     const response = await fetch(url, {
       ...defaultOptions,
       ...options,
     });
-
 
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);

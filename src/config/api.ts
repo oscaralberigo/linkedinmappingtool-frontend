@@ -1,24 +1,13 @@
-interface ApiConfig {
-  baseUrl: string;
-  endpoints: {
-    searchCompanies: string;
-    businessModels: string;
-    linkedInIds: string;
-    allCompaniesLinkedinIds: string;
-  };
-}
+import { ApiConfig } from '../types/api';
 
 const getApiConfig = (): ApiConfig => {
   const environment = process.env.REACT_APP_ENV || 'development';
-  
   // Shared endpoints across all environments
   const endpoints = {
-    searchCompanies: process.env.REACT_APP_SEARCH_COMPANIES_ENDPOINT || '/api/search-companies',
     businessModels: process.env.REACT_APP_BUSINESS_MODELS_ENDPOINT || '/api/business-models',
     linkedInIds: process.env.REACT_APP_LINKEDIN_IDS_ENDPOINT || '/api/linkedin-ids',
     allCompaniesLinkedinIds: process.env.REACT_APP_ALL_COMPANIES_LINKEDIN_IDS_ENDPOINT || '/api/all-companies-linkedin-ids',
   };
-
   // Only base URL changes per environment
   const baseUrls: Record<string, string> = {
     development: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3003',

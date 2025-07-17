@@ -22,26 +22,13 @@ export const useBusinessModels = () => {
         id: (index + 1).toString(),
         name: name
       }));
-      
-      console.log('Transformed business models:', transformedModels);
       setBusinessModels(transformedModels);
       setFilteredModels(transformedModels);
     } catch (err) {
       console.error('Failed to load business models:', err);
       setError(ERROR_MESSAGES.LOAD_BUSINESS_MODELS);
-      // Fallback to mock data
-      const mockBusinessModels: BusinessModel[] = [
-        { id: '1', name: 'SaaS' },
-        { id: '2', name: 'E-commerce' },
-        { id: '3', name: 'Marketplace' },
-        { id: '4', name: 'Subscription' },
-        { id: '5', name: 'Freemium' },
-        { id: '6', name: 'B2B' },
-        { id: '7', name: 'B2C' },
-        { id: '8', name: 'D2C' },
-      ];
-      setBusinessModels(mockBusinessModels);
-      setFilteredModels(mockBusinessModels);
+      setBusinessModels([]);
+      setFilteredModels([]);
     } finally {
       setLoading(false);
     }

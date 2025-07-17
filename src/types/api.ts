@@ -1,5 +1,14 @@
 // API Request Interfaces
 
+export interface ApiConfig {
+  baseUrl: string;
+  endpoints: {
+    businessModels: string;
+    linkedInIds: string;
+    allCompaniesLinkedinIds: string;
+  };
+}
+
 export interface LinkedInIdsRequest {
   businessModels: string;
 }

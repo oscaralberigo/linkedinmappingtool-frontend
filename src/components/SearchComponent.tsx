@@ -46,7 +46,6 @@ const SearchComponent: React.FC = () => {
   const handleBusinessModelSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
     setBusinessModelSearchTerm(searchTerm);
-
     filterBusinessModels(searchTerm);
     setShowBusinessModelDropdown(true);
   };
