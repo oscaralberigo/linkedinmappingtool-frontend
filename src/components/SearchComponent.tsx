@@ -33,8 +33,7 @@ const SearchComponent: React.FC = () => {
   const {
     loading: linkedInLoading,
     error: linkedInError,
-    performSearch,
-    clearError
+    performSearch
   } = useLinkedInSearch({
     onError: (error) => alert(error)
   });

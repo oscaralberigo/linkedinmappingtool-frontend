@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import SearchComponent from './components/SearchComponent';
 
 function App() {
