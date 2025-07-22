@@ -34,6 +34,7 @@ class ApiService {
     }
     const defaultOptions: RequestInit = {
       headers,
+      credentials: 'include', // <-- This ensures cookies are sent!
     };
 
     const response = await fetch(url, {
@@ -60,7 +61,6 @@ class ApiService {
       businessModels: request.businessModels
     });
     
-    
     return this.makeRequest<LinkedInIdsResponse>(`linkedInIds?${queryParams}`, {
       method: 'GET',
     });
@@ -73,4 +73,4 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService(); 
+export const apiService = new ApiService();
