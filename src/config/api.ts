@@ -1,5 +1,11 @@
-import { ApiConfig } from '../types/api';
-
+interface ApiConfig {
+  baseUrl: string;
+  endpoints: {
+    businessModels: string;
+    linkedInIds: string;
+    allCompaniesLinkedinIds: string;
+  };
+}
 const getApiConfig = (): ApiConfig => {
   const environment = process.env.REACT_APP_ENV || 'development';
   // Shared endpoints across all environments
@@ -27,7 +33,7 @@ export const getApiUrl = (endpoint: keyof ApiConfig['endpoints']): string => {
   const endpointPath = apiConfig.endpoints[endpoint];
   
   if (!endpointPath) {
-    throw new Error(`Endpoint ${endpoint} is not configured`);
+    throw new Error(`Endpoint ${String(endpoint)} is not configured`);
   }
   
   const url = `${apiConfig.baseUrl}${endpointPath}`;

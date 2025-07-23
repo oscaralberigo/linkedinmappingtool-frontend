@@ -34,10 +34,6 @@ export class LinkedInSearchService {
       // Fetch LinkedIn IDs from API
       const response = await apiService.getLinkedInIds(request);
       
-      console.log('LinkedIn IDs received from business models:', response.linkedInIds);
-      console.log('Total count:', response.count);
-      console.log('Business model:', response.businessModel);
-
       allLinkedInIds = [...response.linkedInIds];
     }
 

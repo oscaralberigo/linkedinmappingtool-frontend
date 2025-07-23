@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BusinessModel, Company } from '../types/api';
+import { BusinessModel } from '../types/api';
+import { CompanyWithLinkedInId } from '../types/search';
 import { useBusinessModels } from '../hooks/useBusinessModels';
 import { useCompanies } from '../hooks/useCompanies';
 import { useLinkedInSearch } from '../hooks/useLinkedInSearch';
@@ -7,7 +8,7 @@ import { useLinkedInSearch } from '../hooks/useLinkedInSearch';
 const SearchComponent: React.FC = () => {
   const [keywords, setKeywords] = useState<string>('');
   const [selectedBusinessModels, setSelectedBusinessModels] = useState<BusinessModel[]>([]);
-  const [selectedCompanies, setSelectedCompanies] = useState<Company[]>([]);
+  const [selectedCompanies, setSelectedCompanies] = useState<CompanyWithLinkedInId[]>([]);
   const [showBusinessModelDropdown, setShowBusinessModelDropdown] = useState<boolean>(false);
   const [showCompanyDropdown, setShowCompanyDropdown] = useState<boolean>(false);
   const [businessModelSearchTerm, setBusinessModelSearchTerm] = useState<string>('');
@@ -63,7 +64,7 @@ const SearchComponent: React.FC = () => {
     setShowBusinessModelDropdown(false);
   };
 
-  const handleCompanySelect = (company: Company) => {
+  const handleCompanySelect = (company: CompanyWithLinkedInId) => {
     setSelectedCompanies(prev => [...prev, company]);
     setCompanySearchTerm('');
     setShowCompanyDropdown(false);

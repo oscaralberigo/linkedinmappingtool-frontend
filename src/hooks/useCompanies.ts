@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Company } from '../types/api';
 import { apiService } from '../services/api';
+import { CompanyWithLinkedInId } from '../types/search';
 
 export const useCompanies = () => {
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const [companies, setCompanies] = useState<CompanyWithLinkedInId[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<CompanyWithLinkedInId[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

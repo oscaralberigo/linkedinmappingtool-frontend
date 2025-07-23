@@ -5,6 +5,12 @@ import {
   LinkedInIdsResponse,
   AllCompaniesResponse
 } from '../types/api';
+import {
+  SearchFilters,
+  SavedSearchRequest,
+  SavedSearchResponse,
+  CompanyWithLinkedInId
+} from '../types/search';
 
 class ApiService {
   private async makeRequest<T>(
@@ -50,6 +56,7 @@ class ApiService {
     return data;
   }
 
+  // Existing methods
   async getBusinessModels(): Promise<BusinessModelsResponse> {
     return this.makeRequest<BusinessModelsResponse>('businessModels', {
       method: 'GET',
@@ -69,6 +76,48 @@ class ApiService {
   async getAllCompanies(): Promise<AllCompaniesResponse> {
     return this.makeRequest<AllCompaniesResponse>('allCompaniesLinkedinIds', {
       method: 'GET',
+    });
+  }
+
+  // New dynamic search method
+  async searchCompaniesLinkedInIds(filters: SearchFilters): Promise<CompanyWithLinkedInId[]> {
+    const queryParams = new URLSearchParams();
+    
+    // Add filters to query params
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value));
+      }
+    });
+    
+    return this.makeRequest<CompanyWithLinkedInId[]>(`searchLinkedinIds?${queryParams}`, {
+      method: 'GET',
+    });
+  }
+
+  // Saved search methods
+  async saveSearch(request: SavedSearchRequest): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>('savedSearches', {
+      method: 'PUT',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async getAllSavedSearches(): Promise<SavedSearchResponse[]> {
+    return this.makeRequest<SavedSearchResponse[]>('savedSearches', {
+      method: 'GET',
+    });
+  }
+
+  async getSavedSearchById(id: number): Promise<CompanyWithLinkedInId[]> {
+    return this.makeRequest<CompanyWithLinkedInId[]>(`savedSearches/${id}`, {
+      method: 'GET',
+    });
+  }
+
+  async deleteSavedSearch(id: number): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(`savedSearches/${id}`, {
+      method: 'DELETE',
     });
   }
 }
