@@ -1,56 +1,48 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { BusinessModel } from '../types/api';
-import { ERROR_MESSAGES } from '../config';
+
+interface BusinessModel {
+  id: string | number;
+  name: string;
+}
 
 export const useBusinessModels = () => {
-  const [businessModels, setBusinessModels] = useState<BusinessModel[]>([]);
-  const [filteredModels, setFilteredModels] = useState<BusinessModel[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-
-  const loadBusinessModels = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      console.log('Fetching business models from API...');
-      const models = await apiService.getBusinessModels();
-      console.log('Received business models:', models);
-      
-      // Transform the API response to match expected format
-      const transformedModels = models.businessModels.map((name: string, index: number) => ({
-        id: (index + 1).toString(),
-        name: name
-      }));
-      setBusinessModels(transformedModels);
-      setFilteredModels(transformedModels);
-    } catch (err) {
-      console.error('Failed to load business models:', err);
-      setError(ERROR_MESSAGES.LOAD_BUSINESS_MODELS);
-      setBusinessModels([]);
-      setFilteredModels([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterBusinessModels = (searchTerm: string) => {
-    const filtered = businessModels.filter(model =>
-      model.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredModels(filtered);
-  };
+  const [categories, setCategories] = useState<BusinessModel[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadBusinessModels();
+    const loadCategories = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await apiService.getBusinessModels();
+        const categoryItems = response.businessModels.map((model, index) => ({
+          id: index,
+          name: model
+        }));
+        setCategories(categoryItems);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load categories';
+        setError(errorMessage);
+        console.error('Failed to load categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCategories();
   }, []);
 
   return {
-    businessModels,
-    filteredModels,
+    categories,
     loading,
     error,
-    filterBusinessModels,
-    reloadBusinessModels: loadBusinessModels
+    refetch: () => {
+      setCategories([]);
+      setError(null);
+      setLoading(true);
+    }
   };
 }; 

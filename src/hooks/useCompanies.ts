@@ -1,57 +1,66 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { CompanyWithLinkedInId } from '../types/search';
+
+interface Company {
+    id: string;
+    name: string;
+    linkedin_id: string;
+}
 
 export const useCompanies = () => {
-  const [companies, setCompanies] = useState<CompanyWithLinkedInId[]>([]);
-  const [filteredCompanies, setFilteredCompanies] = useState<CompanyWithLinkedInId[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load all companies on mount
   useEffect(() => {
+    const loadCompanies = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        console.log('Loading companies...');
+        const response = await apiService.getAllCompanies();
+        
+        if (!response.companies || !Array.isArray(response.companies)) {
+          console.error('Invalid response format:', response);
+          setError('Invalid response format from API');
+          return;
+        }
+        
+        const companyItems = response.companies.map((company, index) => ({
+          id: company.id || index, // Use linkedin_id as the id
+          name: company.company_name, // Use company_name as the name
+          linkedin_id: company.linkedin_id
+        }));
+        
+        
+        // Ensure unique IDs by adding index if there are duplicates
+        const uniqueCompanies = companyItems.map((company, index) => ({
+          ...company,
+          id: `${company.id}` // Make IDs unique by combining with index
+        }));
+        
+        setCompanies(uniqueCompanies);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load companies';
+        setError(errorMessage);
+        console.error('Failed to load companies:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadCompanies();
   }, []);
 
-  const loadCompanies = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await apiService.getAllCompanies();
-      
-      // Validate the response structure
-      if (!response.companies || !Array.isArray(response.companies)) {
-        throw new Error('Invalid response format: companies array not found');
-      }
-      
-      setCompanies(response.companies);
-      setFilteredCompanies(response.companies);
-    } catch (err) {
-      console.error('Error loading companies:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load companies');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterCompanies = useCallback((searchTerm: string) => {
-    if (!searchTerm.trim()) {
-      setFilteredCompanies(companies);
-      return;
-    }
-
-    const filtered = companies.filter(company =>
-      company.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredCompanies(filtered);
-  }, [companies]);
-
   return {
     companies,
-    filteredCompanies,
     loading,
     error,
-    filterCompanies,
-    reloadCompanies: loadCompanies
+    refetch: () => {
+      setCompanies([]);
+      setError(null);
+      setLoading(true);
+    }
   };
 }; 

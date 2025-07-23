@@ -23,10 +23,15 @@ export interface LinkedInIdsResponse {
 
 export interface AllCompaniesResponse {
   companies: Array<{
-    company_id: number;
+    id: string;
     company_name: string;
     linkedin_id: string;
   }>;
+}
+
+export interface EmployeeCountRangeResponse {
+  min: number;
+  max: number;
 }
 
 // Generic API error response

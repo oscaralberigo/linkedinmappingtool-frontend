@@ -3,7 +3,8 @@ import {
   BusinessModelsResponse,
   LinkedInIdsRequest,
   LinkedInIdsResponse,
-  AllCompaniesResponse
+  AllCompaniesResponse,
+  EmployeeCountRangeResponse
 } from '../types/api';
 import {
   SearchFilters,
@@ -17,10 +18,18 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Handle query parameters in the endpoint string
-    const [endpointKey, queryString] = endpoint.split('?');
-    const baseUrl = getApiUrl(endpointKey as any);
-    const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    let url: string;
+    
+    // Check if endpoint is a full URL or just a key
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      // It's already a full URL
+      url = endpoint;
+    } else {
+      // Handle query parameters in the endpoint string
+      const [endpointKey, queryString] = endpoint.split('?');
+      const baseUrl = getApiUrl(endpointKey as any);
+      url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    }
     
     // Get API key from environment
     const apiKey = process.env.REACT_APP_API_KEY;
@@ -79,6 +88,12 @@ class ApiService {
     });
   }
 
+  async getEmployeeCountRange(): Promise<EmployeeCountRangeResponse> {
+    return this.makeRequest<EmployeeCountRangeResponse>('employeeCountRange', {
+      method: 'GET',
+    });
+  }
+
   // New dynamic search method
   async searchCompaniesLinkedInIds(filters: SearchFilters): Promise<CompanyWithLinkedInId[]> {
     const queryParams = new URLSearchParams();
@@ -90,7 +105,10 @@ class ApiService {
       }
     });
     
-    return this.makeRequest<CompanyWithLinkedInId[]>(`searchLinkedinIds?${queryParams}`, {
+    const url = `searchLinkedinIds?${queryParams}`;
+    console.log('Making API call to:', url); // Debug log
+    
+    return this.makeRequest<CompanyWithLinkedInId[]>(url, {
       method: 'GET',
     });
   }
@@ -110,9 +128,34 @@ class ApiService {
   }
 
   async getSavedSearchById(id: number): Promise<CompanyWithLinkedInId[]> {
-    return this.makeRequest<CompanyWithLinkedInId[]>(`savedSearches/${id}`, {
+    const baseUrl = getApiUrl('savedSearches');
+    const url = `${baseUrl}/${id}`;
+    
+    // Get API key from environment
+    const apiKey = process.env.REACT_APP_API_KEY;
+
+    // Ensure headers is a plain object with string keys and values
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add API key header if available
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
+
+    const response = await fetch(url, {
       method: 'GET',
+      headers,
+      credentials: 'include',
     });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
   }
 
   async deleteSavedSearch(id: number): Promise<{ message: string }> {
