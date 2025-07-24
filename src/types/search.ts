@@ -1,3 +1,5 @@
+import { Company } from "./company";
+
 // Search-related types
 export interface SearchFilters {
   businessModels?: string;
@@ -23,14 +25,8 @@ export interface SavedSearchResponse {
 }
 
 export interface SearchResult {
-  companies: CompanyWithLinkedInId[];
+  companies: Company[];
   total: number;
   page: number;
   limit: number;
 }
-
-export interface CompanyWithLinkedInId {
-  company_id: number;
-  company_name: string;
-  linkedin_id: string;
-} 

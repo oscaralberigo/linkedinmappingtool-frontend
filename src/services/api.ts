@@ -10,8 +10,8 @@ import {
   SearchFilters,
   SavedSearchRequest,
   SavedSearchResponse,
-  CompanyWithLinkedInId
 } from '../types/search';
+import { Company } from '../types/company';
 
 class ApiService {
   private async makeRequest<T>(
@@ -95,7 +95,7 @@ class ApiService {
   }
 
   // New dynamic search method
-  async searchCompaniesLinkedInIds(filters: SearchFilters): Promise<CompanyWithLinkedInId[]> {
+  async searchCompaniesLinkedInIds(filters: SearchFilters): Promise<Company[]> {
     const queryParams = new URLSearchParams();
     
     // Add filters to query params
@@ -108,9 +108,18 @@ class ApiService {
     const url = `searchLinkedinIds?${queryParams}`;
     console.log('Making API call to:', url); // Debug log
     
-    return this.makeRequest<CompanyWithLinkedInId[]>(url, {
+    const data = await this.makeRequest<any[]>(url, {
       method: 'GET',
     });
+    
+    // Map the API response to Company interface
+    return data.map((company: any) => ({
+      id: company.id,
+      name: company.company_name || company.name,
+      linkedin_id: company.linkedin_id,
+      linkedin_page: company.linkedin_page,
+      added_manually: false
+    }));
   }
 
   // Saved search methods
@@ -127,7 +136,7 @@ class ApiService {
     });
   }
 
-  async getSavedSearchById(id: number): Promise<CompanyWithLinkedInId[]> {
+  async getSavedSearchById(id: number): Promise<Company[]> {
     const baseUrl = getApiUrl('savedSearches');
     const url = `${baseUrl}/${id}`;
     
@@ -155,7 +164,15 @@ class ApiService {
     }
 
     const data = await response.json();
-    return data;
+    
+    // Map the API response to Company interface
+    return data.map((company: any) => ({
+      id: company.id,
+      name: company.company_name || company.name,
+      linkedin_id: company.linkedin_id,
+      linkedin_page: company.linkedin_page,
+      added_manually: false
+    }));
   }
 
   async deleteSavedSearch(id: number): Promise<{ message: string }> {

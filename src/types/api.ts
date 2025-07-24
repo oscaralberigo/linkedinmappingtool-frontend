@@ -26,6 +26,7 @@ export interface AllCompaniesResponse {
     id: string;
     company_name: string;
     linkedin_id: string;
+    linkedin_page: string;
   }>;
 }
 

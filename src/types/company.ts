@@ -2,16 +2,11 @@
 export interface Company {
   id: string;
   name: string;
-  industry?: string;
-  size?: number;
-  location?: string;
-  description?: string;
-  linkedInId?: string;
-  website?: string;
-  founded?: number;
-  revenue?: string;
-  employees?: number;
+  linkedin_id: string;
+  linkedin_page?: string;
+  added_manually?: boolean;
 }
+
 
 export interface CompanyCategory {
   id: string;

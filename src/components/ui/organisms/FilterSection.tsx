@@ -15,7 +15,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   isOpen,
   onToggle,
   children,
-  selectedCount = 0
+  selectedCount
 }) => {
   return (
     <Box>

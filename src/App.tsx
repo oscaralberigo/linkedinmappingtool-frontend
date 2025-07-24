@@ -1,9 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Box, CssBaseline, ThemeProvider, createTheme, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button as MuiButton, Snackbar, Alert } from '@mui/material';
+import { Box, CssBaseline, ThemeProvider, createTheme, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button as MuiButton, Snackbar, Alert, Button } from '@mui/material';
 import CompanyList from './components/CompanyList';
-import { useSearch } from './hooks/useSearch';
+import { useCompanies } from './hooks/useCompanies';
 import Sidebar from './components/Sidebar';
 import { apiService } from './services/api';
+import { LinkedInUrlFormatter } from './utils/linkedinUrlFormatter';
+import { useSearch } from './hooks/useSearch';
+import { Company } from './types/company';
 
 const theme = createTheme({
   palette: {
@@ -17,16 +20,11 @@ const theme = createTheme({
 });
 
 function App() {
-  const { 
-    companies, 
-    manuallyAddedCompanies,
-    loading, 
-    error, 
-    searchCompanies, 
-    addManuallySelectedCompanies,
-    setCompanies,
-    getCombinedResults 
-  } = useSearch();
+  const {
+    loading,
+    error,
+    allCompanies,
+  } = useCompanies();
 
   // Save Search Modal State
   const [saveModalOpen, setSaveModalOpen] = useState(false);
@@ -34,11 +32,29 @@ function App() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
+  const [companyList, setCompanyList] = useState<Company[]>([]);
+
+  const availableForManualSelection = allCompanies.filter(
+    company => {
+      const existingCompany = companyList.find(existing => existing.id === company.id);
+      // Show if not in list, or if in list but added manually (so it can be deselected)
+      return !existingCompany || existingCompany.added_manually;
+    }
+  );
+
+  const clearCompanyList = () => {
+    setCompanyList([]);
+  };
+  const {
+    returnedCompanies,
+    setReturnedCompanies,
+    loading: returnedCompaniesLoading,
+    error: returnedCompaniesError,
+    searchCompanies,
+  } = useSearch(companyList);
+
   // Ref to store the refresh function from Sidebar
   const refreshSavedSearchesRef = useRef<(() => void) | null>(null);
-
-  // Get combined results for display
-  const combinedCompanies = getCombinedResults();
 
   // Open modal from Sidebar
   const handleSaveSearch = () => {
@@ -48,17 +64,56 @@ function App() {
   // Load saved search handler
   const handleLoadSavedSearch = async (searchId: number) => {
     try {
-      console.log('Loading saved search with ID:', searchId);
+      clearCompanyList();
       const savedCompanies = await apiService.getSavedSearchById(searchId);
-      console.log('Loaded companies:', savedCompanies);
-      setCompanies(savedCompanies);
+      // Convert to Company[] with added_manually: false
+      const loaded: Company[] = savedCompanies.map((c) => ({ ...c, id: c.id, name: c.name, added_manually: false }));
+      setCompanyList(loaded);
       setSnackbar({ open: true, message: 'Saved search loaded successfully!', severity: 'success' });
     } catch (err) {
-      console.error('Error loading saved search:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setSnackbar({ open: true, message: `Failed to load saved search: ${errorMessage}`, severity: 'error' });
+      setSnackbar({ open: true, message: 'Failed to load saved search', severity: 'error' });
     }
   };
+
+  // Get Companies (was Generate Search)
+  const handleSearchCompanies = async (filters: any, keywords?: string) => {
+  const merged = await searchCompanies(filters);
+  setCompanyList(merged); // This will update your right-hand list with the merged/filtered companies
+};
+
+  const handleSearchLinkedin = () => {
+    const companyIds = companyList.map(company => company.linkedin_id);
+    LinkedInUrlFormatter.openLinkedInPeopleSearch({
+      companyIds,
+      keywords: ''
+    });
+  };
+
+  // Add companies manually
+  const handleAddManuallySelectedCompany = (companyId: string | number) => {
+    
+    setCompanyList(prev => {
+      const alreadyInList = new Set(prev.map(c => c.id));
+      const companyIdStr = companyId.toString();
+      
+      if (alreadyInList.has(companyIdStr)) {
+        return prev;
+      }
+      
+      const toAdd = allCompanies.find(c => c.id === companyId);
+      if (!toAdd) {
+        return prev;
+      }
+      
+      return [...prev, { ...toAdd, added_manually: true }];
+    });
+  };
+
+  // Remove companies manually
+  const handleRemoveManuallySelectedCompany = (companyId: string | number) => {
+    setCompanyList(prev => prev.filter(c => c.id !== companyId));
+  };
+
 
   // Save search handler
   const handleSaveSearchConfirm = async () => {
@@ -66,18 +121,17 @@ function App() {
       setSnackbar({ open: true, message: 'Please enter a search name.', severity: 'error' });
       return;
     }
-    if (!combinedCompanies || combinedCompanies.length === 0) {
+    if (!companyList || companyList.length === 0) {
       setSnackbar({ open: true, message: 'No companies to save. Please run a search first.', severity: 'error' });
       return;
     }
     setSaveLoading(true);
     try {
-      const company_ids = combinedCompanies.map(c => c.company_id);
+      const company_ids = companyList.map(c => parseInt(c.id));
       await apiService.saveSearch({ search_name: searchName.trim(), company_ids });
       setSnackbar({ open: true, message: 'Search saved successfully!', severity: 'success' });
       setSaveModalOpen(false);
       setSearchName('');
-      // Refresh the saved searches list
       if (refreshSavedSearchesRef.current) {
         refreshSavedSearchesRef.current();
       }
@@ -98,27 +152,24 @@ function App() {
       <CssBaseline />
       <Box sx={{ display: 'flex', height: '100vh' }}>
         <Sidebar
-          onSearch={searchCompanies}
-          onAddManuallySelectedCompanies={addManuallySelectedCompanies}
+          onGetCompanies={handleSearchCompanies}
+          onAddManuallySelectedCompany={handleAddManuallySelectedCompany}
+          onRemoveManuallySelectedCompany={handleRemoveManuallySelectedCompany}
           onSaveSearch={handleSaveSearch}
           onLoadSavedSearch={handleLoadSavedSearch}
           onRefreshSavedSearches={(refreshFn) => {
             refreshSavedSearchesRef.current = refreshFn;
           }}
           loading={loading}
-          searchResults={companies}
+          companies={companyList}
+          availableForManualSelection={availableForManualSelection}
         />
         <Box sx={{ flex: 1, p: 3, backgroundColor: '#f5f5f5' }}>
-          {/* <Box sx={{ mb: 2 }}>
-            <LoginButton />
-          </Box> */}
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Filter company universe
-          </Typography>
           <CompanyList
-            companies={combinedCompanies}
+            companies={companyList}
             loading={loading}
             error={error || undefined}
+            onSearchLinkedIn={handleSearchLinkedin}
           />
         </Box>
       </Box>
@@ -144,7 +195,6 @@ function App() {
           </MuiButton>
         </DialogActions>
       </Dialog>
-      {/* Snackbar for feedback */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

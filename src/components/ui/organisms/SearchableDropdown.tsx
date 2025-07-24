@@ -17,6 +17,8 @@ interface SearchableDropdownProps {
   onSelectionChange: (selectedIds: Array<string | number>) => void;
   placeholder?: string;
   loading?: boolean;
+  availableCount?: number; // Optional prop to show available count instead of selected count
+  showSelectedOutOfAvailable?: boolean; // New prop to show "selected/available" format
 }
 
 const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
@@ -25,7 +27,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   selectedItems,
   onSelectionChange,
   placeholder = 'Search...',
-  loading = false
+  loading = false,
+  availableCount,
+  showSelectedOutOfAvailable = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,15 +52,21 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   );
 
   const handleItemClick = (itemId: string | number) => {
-    console.log('Item clicked:', itemId, 'Current selection:', selectedItems);
     const newSelection = selectedItems.includes(itemId)
       ? selectedItems.filter(id => id !== itemId)
       : [...selectedItems, itemId];
-    console.log('New selection:', newSelection);
     onSelectionChange(newSelection);
   };
 
-  const selectedCount = selectedItems.length;
+  // Determine what count to display
+  let displayCount: number | string;
+  if (showSelectedOutOfAvailable && availableCount !== undefined) {
+    displayCount = `${selectedItems.length}/${availableCount}`;
+  } else if (availableCount !== undefined) {
+    displayCount = availableCount;
+  } else {
+    displayCount = selectedItems.length;
+  }
 
   return (
     <Box ref={dropdownRef} sx={{ position: 'relative' }}>
@@ -64,7 +74,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         title={title}
         isOpen={isOpen}
         onToggle={() => setIsOpen(!isOpen)}
-        selectedCount={selectedCount}
+        selectedCount={displayCount}
       />
       <Collapse in={isOpen}>
         <Paper

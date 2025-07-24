@@ -9,7 +9,7 @@ interface FilterHeaderProps {
   title: string;
   isOpen: boolean;
   onToggle: () => void;
-  selectedCount?: number;
+  selectedCount?: number | string;
 }
 
 const FilterHeader: React.FC<FilterHeaderProps> = ({
@@ -38,18 +38,19 @@ const FilterHeader: React.FC<FilterHeaderProps> = ({
         <Typography variant="body2" sx={{ fontWeight: 500 }}>
           {title}
         </Typography>
-        {selectedCount > 0 && (
+        {selectedCount !== undefined && (
           <Box
             sx={{
               backgroundColor: 'primary.main',
               color: 'white',
               borderRadius: '50%',
-              width: 20,
+              minWidth: 20,
               height: 20,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '0.75rem',
+              padding: '0 4px',
             }}
           >
             {selectedCount}
