@@ -168,6 +168,7 @@ function App() {
           companies={companyList}
           availableForManualSelection={availableForManualSelection}
           currentKeywords={currentKeywords}
+          onKeywordsChange={setCurrentKeywords}
         />
         <Box sx={{ flex: 1, p: 3, backgroundColor: '#f5f5f5' }}>
           <CompanyList
