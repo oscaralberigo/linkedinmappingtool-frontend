@@ -73,7 +73,7 @@ const CompanyList: React.FC<CompanyListProps> = ({
         }}
       >
         <Typography color="text.secondary">
-          No companies found. Try adjusting your search criteria.
+          No companies found. Try another search.
         </Typography>
       </Box>
     );
