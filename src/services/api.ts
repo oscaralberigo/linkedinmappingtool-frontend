@@ -3,18 +3,33 @@ import {
   BusinessModelsResponse,
   LinkedInIdsRequest,
   LinkedInIdsResponse,
-  AllCompaniesResponse
+  AllCompaniesResponse,
+  EmployeeCountRangeResponse
 } from '../types/api';
+import {
+  SearchFilters,
+  SavedSearchRequest,
+  SavedSearchResponse,
+} from '../types/search';
+import { Company } from '../types/company';
 
 class ApiService {
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Handle query parameters in the endpoint string
-    const [endpointKey, queryString] = endpoint.split('?');
-    const baseUrl = getApiUrl(endpointKey as any);
-    const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    let url: string;
+    
+    // Check if endpoint is a full URL or just a key
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      // It's already a full URL
+      url = endpoint;
+    } else {
+      // Handle query parameters in the endpoint string
+      const [endpointKey, queryString] = endpoint.split('?');
+      const baseUrl = getApiUrl(endpointKey as any);
+      url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    }
     
     // Get API key from environment
     const apiKey = process.env.REACT_APP_API_KEY;
@@ -50,6 +65,7 @@ class ApiService {
     return data;
   }
 
+  // Existing methods
   async getBusinessModels(): Promise<BusinessModelsResponse> {
     return this.makeRequest<BusinessModelsResponse>('businessModels', {
       method: 'GET',
@@ -69,6 +85,99 @@ class ApiService {
   async getAllCompanies(): Promise<AllCompaniesResponse> {
     return this.makeRequest<AllCompaniesResponse>('allCompaniesLinkedinIds', {
       method: 'GET',
+    });
+  }
+
+  async getEmployeeCountRange(): Promise<EmployeeCountRangeResponse> {
+    return this.makeRequest<EmployeeCountRangeResponse>('employeeCountRange', {
+      method: 'GET',
+    });
+  }
+
+  // New dynamic search method
+  async searchCompaniesLinkedInIds(filters: SearchFilters): Promise<Company[]> {
+    const queryParams = new URLSearchParams();
+    
+    // Add filters to query params
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value));
+      }
+    });
+    
+    const url = `searchLinkedinIds?${queryParams}`;
+    console.log('Making API call to:', url); // Debug log
+    
+    const data = await this.makeRequest<any[]>(url, {
+      method: 'GET',
+    });
+    
+    // Map the API response to Company interface
+    return data.map((company: any) => ({
+      id: company.id,
+      name: company.company_name || company.name,
+      linkedin_id: company.linkedin_id,
+      linkedin_page: company.linkedin_page,
+      added_manually: false
+    }));
+  }
+
+  // Saved search methods
+  async saveSearch(request: SavedSearchRequest): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>('savedSearches', {
+      method: 'PUT',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async getAllSavedSearches(): Promise<SavedSearchResponse[]> {
+    return this.makeRequest<SavedSearchResponse[]>('savedSearches', {
+      method: 'GET',
+    });
+  }
+
+  async getSavedSearchById(id: number): Promise<Company[]> {
+    const baseUrl = getApiUrl('savedSearches');
+    const url = `${baseUrl}/${id}`;
+    
+    // Get API key from environment
+    const apiKey = process.env.REACT_APP_API_KEY;
+
+    // Ensure headers is a plain object with string keys and values
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add API key header if available
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // Map the API response to Company interface
+    return data.map((company: any) => ({
+      id: company.id,
+      name: company.company_name || company.name,
+      linkedin_id: company.linkedin_id,
+      linkedin_page: company.linkedin_page,
+      added_manually: false
+    }));
+  }
+
+  async deleteSavedSearch(id: number): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>(`savedSearches/${id}`, {
+      method: 'DELETE',
     });
   }
 }

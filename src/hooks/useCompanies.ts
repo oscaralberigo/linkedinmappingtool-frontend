@@ -1,57 +1,46 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Company } from '../types/api';
+import { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
+import { Company } from '../types/company';
+
+
 
 export const useCompanies = () => {
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load all companies on mount
+  // Load all companies from API (for dropdown filtering)
+  const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   useEffect(() => {
+    const loadCompanies = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await apiService.getAllCompanies();
+        if (!response.companies || !Array.isArray(response.companies)) {
+          setError('Invalid response format from API');
+          return;
+        }
+        const all = response.companies.map((company) => ({
+          id: company.id,
+          name: company.company_name,
+          linkedin_id: company.linkedin_id,
+          linkedin_page: company.linkedin_page,
+          added_manually: false,
+        }));
+        setAllCompanies(all);
+      } catch (err) {
+        setError('Failed to load companies');
+      } finally {
+        setLoading(false);
+      }
+    };
     loadCompanies();
   }, []);
 
-  const loadCompanies = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await apiService.getAllCompanies();
-      
-      // Validate the response structure
-      if (!response.companies || !Array.isArray(response.companies)) {
-        throw new Error('Invalid response format: companies array not found');
-      }
-      
-      setCompanies(response.companies);
-      setFilteredCompanies(response.companies);
-    } catch (err) {
-      console.error('Error loading companies:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load companies');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterCompanies = useCallback((searchTerm: string) => {
-    if (!searchTerm.trim()) {
-      setFilteredCompanies(companies);
-      return;
-    }
-
-    const filtered = companies.filter(company =>
-      company.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredCompanies(filtered);
-  }, [companies]);
-
   return {
-    companies,
-    filteredCompanies,
+    allCompanies,
+    setAllCompanies,
     loading,
-    error,
-    filterCompanies,
-    reloadCompanies: loadCompanies
+    error
   };
 }; 
