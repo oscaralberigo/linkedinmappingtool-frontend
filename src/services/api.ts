@@ -136,7 +136,7 @@ class ApiService {
     });
   }
 
-  async getSavedSearchById(id: number): Promise<Company[]> {
+  async getSavedSearchById(id: number): Promise<{ companies: Company[]; keywords: string }> {
     const baseUrl = getApiUrl('savedSearches');
     const url = `${baseUrl}/${id}`;
     
@@ -165,14 +165,19 @@ class ApiService {
 
     const data = await response.json();
     
-    // Map the API response to Company interface
-    return data.map((company: any) => ({
-      id: company.id,
-      name: company.company_name || company.name,
+    // Map the API response to Company interface and extract keywords
+    const companies = data.companies?.map((company: any) => ({
+      id: company.company_id, // Map company_id to id
+      name: company.company_name, // Map company_name to name
       linkedin_id: company.linkedin_id,
       linkedin_page: company.linkedin_page,
       added_manually: false
-    }));
+    })) || [];
+    
+    return {
+      companies,
+      keywords: data.keywords || ''
+    };
   }
 
   async deleteSavedSearch(id: number): Promise<{ message: string }> {
