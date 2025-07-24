@@ -25,6 +25,7 @@ interface SidebarProps {
   loading: boolean;
   companies: Company[];
   availableForManualSelection: Company[];
+  currentKeywords?: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -36,7 +37,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onRefreshSavedSearches,
   loading,
   companies,
-  availableForManualSelection
+  availableForManualSelection,
+  currentKeywords
 }) => {
   const [keywords, setKeywords] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<Array<string | number>>([]);
@@ -67,6 +69,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       .map(company => company.id);
     setSelectedCompanies(manuallyAddedIds);
   }, [companies]);
+
+  // Update keywords field when currentKeywords changes (e.g., when loading a saved search)
+  useEffect(() => {
+    if (currentKeywords !== undefined) {
+      setKeywords(currentKeywords);
+    }
+  }, [currentKeywords]);
 
   // Calculate available count for manual dropdown
   const availableCount = availableForManualSelection.length;

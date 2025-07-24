@@ -15,12 +15,14 @@ export interface SearchFilters {
 export interface SavedSearchRequest {
   search_name: string;
   company_ids: number[];
+  keywords: string;
 }
 
 export interface SavedSearchResponse {
   id: number;
   search_name: string;
   company_ids: number[];
+  keywords: string;
   created_at: string;
 }
 

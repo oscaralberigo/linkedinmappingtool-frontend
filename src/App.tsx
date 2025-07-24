@@ -33,6 +33,7 @@ function App() {
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
   const [companyList, setCompanyList] = useState<Company[]>([]);
+  const [currentKeywords, setCurrentKeywords] = useState<string>('');
 
   const availableForManualSelection = allCompanies.filter(
     company => {
@@ -67,8 +68,10 @@ function App() {
       clearCompanyList();
       const savedCompanies = await apiService.getSavedSearchById(searchId);
       // Convert to Company[] with added_manually: false
-      const loaded: Company[] = savedCompanies.map((c) => ({ ...c, id: c.id, name: c.name, added_manually: false }));
+      console.log(savedCompanies);
+      const loaded: Company[] = savedCompanies.companies.map((c) => ({ ...c, id: c.id, name: c.name, added_manually: false }));
       setCompanyList(loaded);
+      setCurrentKeywords(savedCompanies.keywords || '');
       setSnackbar({ open: true, message: 'Saved search loaded successfully!', severity: 'success' });
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to load saved search', severity: 'error' });
@@ -77,15 +80,16 @@ function App() {
 
   // Get Companies (was Generate Search)
   const handleSearchCompanies = async (filters: any, keywords?: string) => {
-  const merged = await searchCompanies(filters);
-  setCompanyList(merged); // This will update your right-hand list with the merged/filtered companies
-};
+    const merged = await searchCompanies(filters);
+    setCompanyList(merged); // This will update your right-hand list with the merged/filtered companies
+    setCurrentKeywords(keywords || ''); // Store the keywords for LinkedIn search
+  };
 
   const handleSearchLinkedin = () => {
     const companyIds = companyList.map(company => company.linkedin_id);
     LinkedInUrlFormatter.openLinkedInPeopleSearch({
       companyIds,
-      keywords: ''
+      keywords: currentKeywords
     });
   };
 
@@ -128,7 +132,7 @@ function App() {
     setSaveLoading(true);
     try {
       const company_ids = companyList.map(c => parseInt(c.id));
-      await apiService.saveSearch({ search_name: searchName.trim(), company_ids });
+      await apiService.saveSearch({ search_name: searchName.trim(), keywords: currentKeywords, company_ids });
       setSnackbar({ open: true, message: 'Search saved successfully!', severity: 'success' });
       setSaveModalOpen(false);
       setSearchName('');
@@ -163,6 +167,7 @@ function App() {
           loading={loading}
           companies={companyList}
           availableForManualSelection={availableForManualSelection}
+          currentKeywords={currentKeywords}
         />
         <Box sx={{ flex: 1, p: 3, backgroundColor: '#f5f5f5' }}>
           <CompanyList
