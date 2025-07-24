@@ -26,6 +26,7 @@ interface SidebarProps {
   companies: Company[];
   availableForManualSelection: Company[];
   currentKeywords?: string;
+  onKeywordsChange?: (keywords: string) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -38,7 +39,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   loading,
   companies,
   availableForManualSelection,
-  currentKeywords
+  currentKeywords,
+  onKeywordsChange
 }) => {
   const [keywords, setKeywords] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<Array<string | number>>([]);
@@ -76,6 +78,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       setKeywords(currentKeywords);
     }
   }, [currentKeywords]);
+
+  // Sync keywords changes back to parent component
+  const handleKeywordsChange = (newKeywords: string) => {
+    setKeywords(newKeywords);
+    if (onKeywordsChange) {
+      onKeywordsChange(newKeywords);
+    }
+  };
 
   // Calculate available count for manual dropdown
   const availableCount = availableForManualSelection.length;
@@ -176,7 +186,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Typography>
         <SearchBar
           value={keywords}
-          onChange={setKeywords}
+                      onChange={handleKeywordsChange}
           placeholder="keywords"
         />
         <Box>
