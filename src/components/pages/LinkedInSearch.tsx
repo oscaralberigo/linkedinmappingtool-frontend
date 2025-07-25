@@ -111,7 +111,7 @@ const LinkedInSearch: React.FC = () => {
         return prev;
       }
       
-      const toAdd = allCompanies.find(c => c.id === companyId);
+      const toAdd = allCompanies.find((c: Company) => c.id === companyId);
       if (!toAdd) {
         return prev;
       }
@@ -155,7 +155,7 @@ const LinkedInSearch: React.FC = () => {
           {/* Load Saved Search */}
           <LoadSavedSearch
             onLoadSearch={handleLoadSavedSearch}
-            onRefreshSavedSearches={(refreshFn) => {
+            onRefreshSavedSearches={(refreshFn: () => void) => {
               refreshSavedSearchesRef.current = refreshFn;
             }}
           />
