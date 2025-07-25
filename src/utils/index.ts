@@ -1,0 +1,1 @@
+export { LinkedInUrlFormatter } from './linkedInUrlFormatter'; 

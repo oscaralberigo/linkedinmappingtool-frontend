@@ -5,7 +5,7 @@ import { useCompanies } from '../../hooks/useCompanies';
 import LoadSavedSearch from '../ui/y:sections/LoadSavedSearch';
 import CreateNewSearch from '../ui/y:sections/CreateNewSearch';
 import { apiService } from '../../services/api';
-import { LinkedInUrlFormatter } from '../../utils/linkedInUrlFormatter';
+import { LinkedInUrlFormatter } from '../../utils';
 import { useSearch } from '../../hooks/useSearch';
 import { Company } from '../../types/company';
 
