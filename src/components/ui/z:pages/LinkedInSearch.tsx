@@ -25,7 +25,7 @@ const LinkedInSearch: React.FC = () => {
 
   // Filter companies that are available for manual selection
   const companiesAvailableForManualSelection = allCompanies.filter(
-    company => {
+    (company: Company) => {
       const existingCompany = companyList.find(existing => existing.id === company.id);
       // Show if not in list, or if in list but added manually (so it can be deselected)
       return !existingCompany || existingCompany.added_manually;
@@ -52,7 +52,7 @@ const LinkedInSearch: React.FC = () => {
       const savedCompanies = await apiService.getSavedSearchById(searchId);
       // Convert to Company[] with added_manually: false
       console.log(savedCompanies);
-      const loaded: Company[] = savedCompanies.companies.map((c) => ({ ...c, id: c.id, name: c.name, added_manually: false }));
+      const loaded: Company[] = savedCompanies.companies.map((c: any) => ({ ...c, id: c.id, name: c.name, added_manually: false }));
       setCompanyList(loaded);
       setKeywords(savedCompanies.keywords || '');
       setSnackbar({ open: true, message: 'Saved search loaded successfully!', severity: 'success' });
@@ -111,7 +111,7 @@ const LinkedInSearch: React.FC = () => {
         return prev;
       }
       
-      const toAdd = allCompanies.find(c => c.id === companyId);
+      const toAdd = allCompanies.find((c: Company) => c.id === companyId);
       if (!toAdd) {
         return prev;
       }
@@ -155,7 +155,7 @@ const LinkedInSearch: React.FC = () => {
           {/* Load Saved Search */}
           <LoadSavedSearch
             onLoadSearch={handleLoadSavedSearch}
-            onRefreshSavedSearches={(refreshFn) => {
+            onRefreshSavedSearches={(refreshFn: () => void) => {
               refreshSavedSearchesRef.current = refreshFn;
             }}
           />
