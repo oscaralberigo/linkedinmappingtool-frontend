@@ -11,25 +11,34 @@ import {
 import { ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon } from '@mui/icons-material';
 import { TextField } from '../atoms';
 
-interface SavedSearch {
-  id: number;
-  search_name: string;
+interface DropdownItem {
+  id: string | number;
+  label: string;
+  [key: string]: any; // Allow additional properties
 }
 
-interface SavedSearchSelectorProps {
+interface GenericSearchableDropdownProps {
   title: string;
-  savedSearches: SavedSearch[];
-  onSelect: (searchId: number) => void;
+  items: DropdownItem[];
+  onSelect: (itemId: string | number) => void;
   placeholder?: string;
   loading?: boolean;
+  emptyMessage?: string;
+  loadingMessage?: string;
+  getItemLabel?: (item: DropdownItem) => string;
+  getItemId?: (item: DropdownItem) => string | number;
 }
 
-const SavedSearchSelector: React.FC<SavedSearchSelectorProps> = ({
+const GenericSearchableDropdown: React.FC<GenericSearchableDropdownProps> = ({
   title,
-  savedSearches,
+  items,
   onSelect,
-  placeholder = 'Search saved searches...',
-  loading = false
+  placeholder = 'Search...',
+  loading = false,
+  emptyMessage = 'No items found',
+  loadingMessage = 'Loading...',
+  getItemLabel = (item) => item.label,
+  getItemId = (item) => item.id
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,12 +56,12 @@ const SavedSearchSelector: React.FC<SavedSearchSelectorProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredSearches = savedSearches.filter(search =>
-    search.search_name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = items.filter(item =>
+    getItemLabel(item).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSearchClick = (searchId: number) => {
-    onSelect(searchId);
+  const handleItemClick = (item: DropdownItem) => {
+    onSelect(getItemId(item));
     setIsOpen(false);
     setSearchTerm('');
   };
@@ -109,17 +118,17 @@ const SavedSearchSelector: React.FC<SavedSearchSelectorProps> = ({
           <List sx={{ maxHeight: 250, overflow: 'auto' }}>
             {loading ? (
               <ListItem key="loading">
-                <ListItemText primary="Loading..." />
+                <ListItemText primary={loadingMessage} />
               </ListItem>
-            ) : filteredSearches.length === 0 ? (
-              <ListItem key="no-searches">
-                <ListItemText primary="No saved searches found" />
+            ) : filteredItems.length === 0 ? (
+              <ListItem key="no-items">
+                <ListItemText primary={emptyMessage} />
               </ListItem>
             ) : (
-              filteredSearches.map((search) => (
+              filteredItems.map((item) => (
                 <ListItem
-                  key={search.id}
-                  onClick={() => handleSearchClick(search.id)}
+                  key={getItemId(item)}
+                  onClick={() => handleItemClick(item)}
                   sx={{
                     cursor: 'pointer',
                     '&:hover': {
@@ -128,7 +137,7 @@ const SavedSearchSelector: React.FC<SavedSearchSelectorProps> = ({
                   }}
                 >
                   <ListItemText 
-                    primary={search.search_name}
+                    primary={getItemLabel(item)}
                     primaryTypographyProps={{ fontSize: '0.875rem' }}
                   />
                 </ListItem>
@@ -141,4 +150,4 @@ const SavedSearchSelector: React.FC<SavedSearchSelectorProps> = ({
   );
 };
 
-export default SavedSearchSelector; 
+export default GenericSearchableDropdown; 

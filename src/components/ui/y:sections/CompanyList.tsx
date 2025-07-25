@@ -11,8 +11,8 @@ import {
   Paper
 } from '@mui/material';
 import { LinkedIn as LinkedInIcon } from '@mui/icons-material';
-import { Company } from '../types/company';
-import { Button } from './ui';
+import { Company } from '../../../types/company';
+import { Button } from '..';
 
 interface CompanyListProps {
   companies: Company[];
@@ -27,56 +27,52 @@ const CompanyList: React.FC<CompanyListProps> = ({
   error,
   onSearchLinkedIn
 }) => {
+
   const handleLinkedInClick = (linkedinPage: string) => {
     if (linkedinPage) {
       window.open(linkedinPage, '_blank');
     }
+  }
+
+  const renderStateContent = () => {
+    const commonStyles = {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: 200,
+    };
+
+    if (loading) {
+      return (
+        <Box sx={commonStyles}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+
+    if (error) {
+      return (
+        <Box sx={commonStyles}>
+          <Typography color="error">{error}</Typography>
+        </Box>
+      );
+    }
+
+    if (companies.length === 0) {
+      return (
+        <Box sx={commonStyles}>
+          <Typography color="text.secondary">
+            No companies found. Try another search.
+          </Typography>
+        </Box>
+      );
+    }
+    return null; // Return null to render the main content
   };
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: 200,
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
 
-  if (error) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: 200,
-        }}
-      >
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
-
-  if (companies.length === 0) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: 200,
-        }}
-      >
-        <Typography color="text.secondary">
-          No companies found. Try another search.
-        </Typography>
-      </Box>
-    );
+  const stateContent = renderStateContent();
+  if (stateContent) {
+    return stateContent;
   }
 
   return (

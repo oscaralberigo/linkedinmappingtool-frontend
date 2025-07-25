@@ -1,3 +1,3 @@
-export { default as SearchableDropdown } from './SearchableDropdown';
 export { default as FilterSection } from './FilterSection';
-export { default as SizeSlider } from './EmployeeCountInput'; 
+export { default as MinMaxFilter } from './MinMaxFilter';
+export { default as SectionWithTitle } from './SectionWithTitle'; 

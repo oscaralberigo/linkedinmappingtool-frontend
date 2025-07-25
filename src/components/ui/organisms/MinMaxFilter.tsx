@@ -1,23 +1,41 @@
 import React from 'react';
 import { Box, Typography, TextField, Collapse } from '@mui/material';
 import FilterSection from './FilterSection';
-import { useEmployeeCountRange } from '../../../hooks';
 
-interface EmployeeCountInputsProps {
+interface Range {
+  min: number;
+  max: number;
+}
+
+interface MinMaxFilterProps {
+  title: string;
   value: [number, number];
   onChange: (value: [number, number]) => void;
   isOpen: boolean;
   onToggle: () => void;
+  range?: Range;
+  loading?: boolean;
+  error?: string;
+  minLabel?: string;
+  maxLabel?: string;
+  step?: number;
+  placeholder?: string;
 }
 
-const EmployeeCountInputs: React.FC<EmployeeCountInputsProps> = ({
+const MinMaxFilter: React.FC<MinMaxFilterProps> = ({
+  title,
   value,
   onChange,
   isOpen,
-  onToggle
+  onToggle,
+  range,
+  loading = false,
+  error,
+  minLabel = 'Min',
+  maxLabel = 'Max',
+  step = 1,
+  placeholder = 'Enter value'
 }) => {
-  const { range, loading, error } = useEmployeeCountRange();
-
   const handleInputChange = (index: 0 | 1) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(e.target.value.replace(/[^0-9]/g, ''));
     const updated = [...value] as [number, number];
@@ -28,13 +46,13 @@ const EmployeeCountInputs: React.FC<EmployeeCountInputsProps> = ({
   if (error) {
     return (
       <FilterSection
-        title="Employee Count"
+        title={title}
         isOpen={isOpen}
         onToggle={onToggle}
       >
         <Box sx={{ p: 2 }}>
           <Typography variant="body2" color="error">
-            Error loading employee count range: {error}
+            Error loading range: {error}
           </Typography>
         </Box>
       </FilterSection>
@@ -43,7 +61,7 @@ const EmployeeCountInputs: React.FC<EmployeeCountInputsProps> = ({
 
   return (
     <FilterSection
-      title="Employee Count"
+      title={title}
       isOpen={isOpen}
       onToggle={onToggle}
     >
@@ -51,33 +69,43 @@ const EmployeeCountInputs: React.FC<EmployeeCountInputsProps> = ({
         <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
           {loading ? (
             <Typography variant="body2" color="text.secondary">
-              Loading employee count range...
+              Loading range...
             </Typography>
           ) : range ? (
             <>
               <TextField
-                label="Min employees"
+                label={minLabel}
                 type="number"
                 value={value[0]}
                 onChange={handleInputChange(0)}
-                inputProps={{ min: range.min, max: value[1], step: 1 }}
+                inputProps={{ 
+                  min: range.min, 
+                  max: value[1], 
+                  step: step,
+                  placeholder: placeholder
+                }}
                 fullWidth
                 size="small"
               />
               <Typography variant="body2" color="text.secondary">to</Typography>
               <TextField
-                label="Max employees"
+                label={maxLabel}
                 type="number"
                 value={value[1]}
                 onChange={handleInputChange(1)}
-                inputProps={{ min: value[0], max: range.max, step: 1 }}
+                inputProps={{ 
+                  min: value[0], 
+                  max: range.max, 
+                  step: step,
+                  placeholder: placeholder
+                }}
                 fullWidth
                 size="small"
               />
             </>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              No employee count range available
+              No range available
             </Typography>
           )}
         </Box>
@@ -86,4 +114,4 @@ const EmployeeCountInputs: React.FC<EmployeeCountInputsProps> = ({
   );
 };
 
-export default EmployeeCountInputs; 
+export default MinMaxFilter; 

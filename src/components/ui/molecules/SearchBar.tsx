@@ -14,7 +14,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = 'keywords',
   value,
   onChange,
-  onClear
+  onClear,
 }) => {
   const handleClear = () => {
     onChange('');

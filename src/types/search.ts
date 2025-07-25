@@ -32,3 +32,5 @@ export interface SearchResult {
   page: number;
   limit: number;
 }
+
+
