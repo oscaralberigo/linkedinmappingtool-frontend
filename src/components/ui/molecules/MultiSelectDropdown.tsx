@@ -8,20 +8,30 @@ import {
   Paper
 } from '@mui/material';
 import { TextField } from '../atoms';
-import { FilterHeader } from '../molecules';
+import { FilterHeader } from './index';
 
-interface SearchableDropdownProps {
+interface DropdownItem {
+  id: string | number;
+  label: string;
+  [key: string]: any; // Allow additional properties
+}
+
+interface MultiSelectDropdownProps {
   title: string;
-  items: Array<{ id: string | number; name: string }>;
+  items: DropdownItem[];
   selectedItems: Array<string | number>;
   onSelectionChange: (selectedIds: Array<string | number>) => void;
   placeholder?: string;
   loading?: boolean;
-  availableCount?: number; // Optional prop to show available count instead of selected count
-  showSelectedOutOfAvailable?: boolean; // New prop to show "selected/available" format
+  availableCount?: number;
+  showSelectedOutOfAvailable?: boolean;
+  emptyMessage?: string;
+  loadingMessage?: string;
+  getItemLabel?: (item: DropdownItem) => string;
+  getItemId?: (item: DropdownItem) => string | number;
 }
 
-const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
+const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   title,
   items,
   selectedItems,
@@ -29,7 +39,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   placeholder = 'Search...',
   loading = false,
   availableCount,
-  showSelectedOutOfAvailable = false
+  showSelectedOutOfAvailable = false,
+  emptyMessage = 'No items found',
+  loadingMessage = 'Loading...',
+  getItemLabel = (item) => item.label,
+  getItemId = (item) => item.id
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,10 +62,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   }, []);
 
   const filteredItems = items.filter(item =>
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    getItemLabel(item).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleItemClick = (itemId: string | number) => {
+  const handleItemClick = (item: DropdownItem) => {
+    const itemId = getItemId(item);
     const newSelection = selectedItems.includes(itemId)
       ? selectedItems.filter(id => id !== itemId)
       : [...selectedItems, itemId];
@@ -103,19 +118,20 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           <List sx={{ maxHeight: 250, overflow: 'auto' }}>
             {loading ? (
               <ListItem key="loading">
-                <ListItemText primary="Loading..." />
+                <ListItemText primary={loadingMessage} />
               </ListItem>
             ) : filteredItems.length === 0 ? (
               <ListItem key="no-items">
-                <ListItemText primary="No items found" />
+                <ListItemText primary={emptyMessage} />
               </ListItem>
             ) : (
               filteredItems.map((item, index) => {
-                const isSelected = selectedItems.includes(item.id);
+                const itemId = getItemId(item);
+                const isSelected = selectedItems.includes(itemId);
                 return (
                   <ListItem
-                    key={`${item.id}-${index}`}
-                    onClick={() => handleItemClick(item.id)}
+                    key={`${itemId}-${index}`}
+                    onClick={() => handleItemClick(item)}
                     sx={{
                       cursor: 'pointer',
                       backgroundColor: isSelected ? 'primary.light' : 'transparent',
@@ -125,7 +141,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     }}
                   >
                     <ListItemText 
-                      primary={item.name}
+                      primary={getItemLabel(item)}
                       primaryTypographyProps={{ fontSize: '0.875rem' }}
                     />
                   </ListItem>
@@ -139,4 +155,4 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   );
 };
 
-export default SearchableDropdown; 
+export default MultiSelectDropdown; 
