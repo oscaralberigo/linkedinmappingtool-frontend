@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button as MuiButton, Snackbar, Alert, Typography } from '@mui/material';
-import CompanyList from '../y:sections/CompanyList';
-import { useCompanies } from '../../../hooks/useCompanies';
-import LoadSavedSearch from '../y:sections/LoadSavedSearch';
-import CreateNewSearch from '../y:sections/CreateNewSearch';
-import { apiService } from '../../../services/api';
-import { LinkedInUrlFormatter } from '../../../utils/linkedInUrlFormatter';
-import { useSearch } from '../../../hooks/useSearch';
-import { Company } from '../../../types/company';
+import CompanyList from '../ui/sections/CompanyList';
+import { useCompanies } from '../../hooks/useCompanies';
+import LoadSavedSearch from '../ui/sections/LoadSavedSearch';
+import CreateNewSearch from '../ui/sections/CreateNewSearch';
+import { apiService } from '../../services/api';
+import { LinkedInUrlFormatter } from '../../utils/linkedInUrlFormatter';
+import { useSearch } from '../../hooks/useSearch';
+import { Company } from '../../types/company';
 
 const LinkedInSearch: React.FC = () => {
   const {
