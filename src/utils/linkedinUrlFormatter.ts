@@ -1,11 +1,3 @@
-import { apiService } from '../services/api';
-import { LinkedInIdsRequest } from '../types/api';
-
-interface LinkedInSearchParams {
-  linkedInIds: string[];
-  keywords: string;
-}
-
 interface LinkedInPeopleSearchParams {
   companyIds: string[];
   keywords: string;
