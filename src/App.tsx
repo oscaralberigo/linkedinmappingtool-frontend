@@ -1,6 +1,6 @@
 import React from 'react';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import LinkedInSearch from './components/ui/z:pages/LinkedInSearch';
+import LinkedInSearch from './components/ui/pages/LinkedInSearch';
 
 const theme = createTheme({
   palette: {
