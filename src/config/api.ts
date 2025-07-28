@@ -7,6 +7,7 @@ interface ApiConfig {
     searchLinkedinIds: string;
     savedSearches: string;
     employeeCountRange: string;
+    locations: string;
   };
 }
 const getApiConfig = (): ApiConfig => {
@@ -19,6 +20,7 @@ const getApiConfig = (): ApiConfig => {
     searchLinkedinIds: process.env.REACT_APP_SEARCH_LINKEDIN_IDS_ENDPOINT || '/api/search-linkedin-ids',
     savedSearches: process.env.REACT_APP_SAVED_SEARCHES_ENDPOINT || '/api/saved-searches',
     employeeCountRange: process.env.REACT_APP_EMPLOYEE_COUNT_RANGE_ENDPOINT || '/api/employee-count-range',
+    locations: process.env.REACT_APP_LOCATIONS_ENDPOINT || '/api/locations',
   };
   // Only base URL changes per environment
   const baseUrls: Record<string, string> = {

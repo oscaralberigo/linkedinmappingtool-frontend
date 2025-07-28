@@ -94,6 +94,12 @@ class ApiService {
     });
   }
 
+  async getLocations(): Promise<Array<{ id: number; location_name: string; location_code: string }>> {
+    return this.makeRequest<Array<{ id: number; location_name: string; location_code: string }>>('locations', {
+      method: 'GET',
+    });
+  }
+
   // New dynamic search method
   async searchCompaniesLinkedInIds(filters: SearchFilters): Promise<Company[]> {
     const queryParams = new URLSearchParams();

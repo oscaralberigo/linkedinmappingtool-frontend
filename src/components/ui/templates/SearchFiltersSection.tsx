@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { SearchBar } from '../molecules';
 import { MultiSelectDropdown } from '../molecules';
 import MinMaxFilter from '../organisms/MinMaxFilter';
-import { useEmployeeCountRange } from '../../../hooks';
+import { useEmployeeCountRange, useLocations } from '../../../hooks';
 
 interface SearchFiltersSectionProps {
   keywords?: string;
@@ -16,6 +16,8 @@ interface SearchFiltersSectionProps {
   isSizeOpen: boolean;
   onSizeToggle: () => void;
   loadingCategories: boolean;
+  selectedLocations?: Array<string>;
+  onLocationsChange?: (locations: Array<string>) => void;
 }
 
 const SearchFiltersSection: React.FC<SearchFiltersSectionProps> = ({
@@ -28,9 +30,24 @@ const SearchFiltersSection: React.FC<SearchFiltersSectionProps> = ({
   onSizeRangeChange,
   isSizeOpen,
   onSizeToggle,
-  loadingCategories
+  loadingCategories,
+  selectedLocations = [],
+  onLocationsChange = () => {}
 }) => {
   const { range, loading: rangeLoading, error: rangeError } = useEmployeeCountRange();
+  const { locations, loading: locationsLoading } = useLocations();
+
+  const handleLocationChange = (selectedIds: Array<string | number>) => {
+    // Map selected IDs to location codes
+    const locationCodes = selectedIds
+      .map(id => {
+        const location = locations.find(loc => loc.id === id);
+        return location?.location_code;
+      })
+      .filter((code): code is string => code !== undefined);
+    
+    onLocationsChange(locationCodes);
+  };
 
   return (
     <Box sx={{ px: 3 }}>
@@ -62,6 +79,14 @@ const SearchFiltersSection: React.FC<SearchFiltersSectionProps> = ({
           error={rangeError || undefined}
           minLabel="Min employees"
           maxLabel="Max employees"
+        />
+        <MultiSelectDropdown
+          title="Candidate Location"
+          items={locations.map(location => ({ label: location.location_name, ...location }))}
+          selectedItems={locations.filter(loc => selectedLocations.includes(loc.location_code)).map(loc => loc.id)}
+          onSelectionChange={handleLocationChange}
+          placeholder="Search locations..."
+          loading={locationsLoading}
         />
       </Box>
     </Box>

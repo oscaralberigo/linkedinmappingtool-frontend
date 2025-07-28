@@ -19,6 +19,7 @@ interface CreateNewSearchProps {
   availableForManualSelection: Company[];
   onAddManuallySelectedCompany: (companyId: string | number) => void;
   onRemoveManuallySelectedCompany: (companyId: string | number) => void;
+  onLocationsChange?: (locations: Array<string>) => void;
 }
 
 const CreateNewSearch: React.FC<CreateNewSearchProps> = ({
@@ -30,10 +31,12 @@ const CreateNewSearch: React.FC<CreateNewSearchProps> = ({
   companies,
   availableForManualSelection,
   onAddManuallySelectedCompany,
-  onRemoveManuallySelectedCompany
+  onRemoveManuallySelectedCompany,
+  onLocationsChange
 }) => {
   const [selectedCategories, setSelectedCategories] = useState<Array<string | number>>([]);
   const [selectedCompanies, setSelectedCompanies] = useState<Array<string | number>>([]);
+  const [selectedLocations, setSelectedLocations] = useState<Array<string>>([]);
   const [isSizeOpen, setIsSizeOpen] = useState(false);
   const { categories, loading: loadingCategories } = useBusinessModels();
   const { range, sizeRange, setSizeRange } = useEmployeeCountRange();
@@ -45,6 +48,13 @@ const CreateNewSearch: React.FC<CreateNewSearchProps> = ({
       .map(company => company.id);
     setSelectedCompanies(manuallyAddedIds);
   }, [companies]);
+
+  // Update parent component when locations change
+  useEffect(() => {
+    if (onLocationsChange) {
+      onLocationsChange(selectedLocations);
+    }
+  }, [selectedLocations, onLocationsChange]);
 
   const handleGetCompanies = () => {
     const businessModels = selectedCategories.map(id => 
@@ -92,6 +102,8 @@ const CreateNewSearch: React.FC<CreateNewSearchProps> = ({
         isSizeOpen={isSizeOpen}
         onSizeToggle={() => setIsSizeOpen(!isSizeOpen)}
         loadingCategories={loadingCategories}
+        selectedLocations={selectedLocations}
+        onLocationsChange={setSelectedLocations}
       />
 
       {/* Company Selection */}

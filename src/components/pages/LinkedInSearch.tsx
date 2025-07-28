@@ -1,14 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button as MuiButton, Snackbar, Alert, Typography } from '@mui/material';
-import CompanyList from '../sections/CompanyList';
-import { useCompanies } from '../../../hooks/useCompanies';
-import LoadSavedSearch from '../sections/LoadSavedSearch';
-import CreateNewSearch from '../sections/CreateNewSearch';
-import { apiService } from '../../../services/api';
-import { LinkedInUrlFormatter } from '../../../utils/linkedInUrlFormatter';
-import { useSearch } from '../../../hooks/useSearch';
-import { useLocations } from '../../../hooks/useLocations';
-import { Company } from '../../../types/company';
+import CompanyList from '../ui/sections/CompanyList';
+import { useCompanies } from '../../hooks/useCompanies';
+import LoadSavedSearch from '../ui/sections/LoadSavedSearch';
+import CreateNewSearch from '../ui/sections/CreateNewSearch';
+import { apiService } from '../../services/api';
+import { LinkedInUrlFormatter } from '../../utils/linkedInUrlFormatter';
+import { useSearch } from '../../hooks/useSearch';
+import { Company } from '../../types/company';
 
 const LinkedInSearch: React.FC = () => {
   const {
@@ -22,7 +21,6 @@ const LinkedInSearch: React.FC = () => {
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   const [companyList, setCompanyList] = useState<Company[]>([]);
   const [keywords, setKeywords] = useState<string>('');
-  const [selectedLocations, setSelectedLocations] = useState<Array<string>>([]);
   const { searchCompanies } = useSearch(companyList);
 
   // Filter companies that are available for manual selection
@@ -98,8 +96,7 @@ const LinkedInSearch: React.FC = () => {
     const companyIds = companyList.map(company => company.linkedin_id);
     LinkedInUrlFormatter.openLinkedInPeopleSearch({
       companyIds,
-      keywords: keywords,
-      locationCodes: selectedLocations
+      keywords: keywords
     });
   };
 
@@ -125,10 +122,6 @@ const LinkedInSearch: React.FC = () => {
   // Remove companies manually
   const handleRemoveManuallySelectedCompany = (companyId: string | number) => {
     setCompanyList(prev => prev.filter(c => c.id !== companyId));
-  };
-
-  const handleLocationsChange = (locations: Array<string>) => {
-    setSelectedLocations(locations);
   };
 
   return (
@@ -186,7 +179,6 @@ const LinkedInSearch: React.FC = () => {
             availableForManualSelection={companiesAvailableForManualSelection}
             onAddManuallySelectedCompany={handleAddManuallySelectedCompany}
             onRemoveManuallySelectedCompany={handleRemoveManuallySelectedCompany}
-            onLocationsChange={handleLocationsChange}
           />
         </Box>
 
