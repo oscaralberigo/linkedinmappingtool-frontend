@@ -7,7 +7,6 @@ export interface SearchFilters {
   sizeTo?: number;
   aumFrom?: number;
   aumTo?: number;
-  location?: string;
   keywords?: string;
   [key: string]: any; // Allow any other dynamic filters
 }
