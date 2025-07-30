@@ -13,10 +13,9 @@
 .DS_Store
 
 # Environment files (keep templates)
-env.development
-env.test
-env.production
-env.shared
+.env.development
+.env.test
+.env.production
 
 # Logs
 npm-debug.log*

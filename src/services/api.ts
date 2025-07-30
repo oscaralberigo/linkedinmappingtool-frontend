@@ -30,9 +30,6 @@ class ApiService {
       const baseUrl = getApiUrl(endpointKey as any);
       url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
     }
-    
-    // Get API key from environment
-    const apiKey = process.env.REACT_APP_API_KEY;
 
     // Ensure headers is a plain object with string keys and values
     const headers: Record<string, string> = {
@@ -43,10 +40,7 @@ class ApiService {
           )
         : {}),
     };
-    // Add API key header if available
-    if (apiKey) {
-      headers['x-api-key'] = apiKey;
-    }
+    
     const defaultOptions: RequestInit = {
       headers,
       credentials: 'include', // <-- This ensures cookies are sent!
@@ -145,23 +139,12 @@ class ApiService {
   async getSavedSearchById(id: number): Promise<{ companies: Company[]; keywords: string }> {
     const baseUrl = getApiUrl('savedSearches');
     const url = `${baseUrl}/${id}`;
-    
-    // Get API key from environment
-    const apiKey = process.env.REACT_APP_API_KEY;
-
-    // Ensure headers is a plain object with string keys and values
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    
-    // Add API key header if available
-    if (apiKey) {
-      headers['x-api-key'] = apiKey;
-    }
 
     const response = await fetch(url, {
       method: 'GET',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
       credentials: 'include',
     });
 
