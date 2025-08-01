@@ -1,18 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Button, 
   Container, 
   Paper,
-  Avatar
+  Avatar,
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { Google as GoogleIcon } from '@mui/icons-material';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 
 const LoginPage: React.FC = () => {
-  const handleGoogleLogin = () => {
-    // Redirect to your backend Google OAuth endpoint
-    const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
-    window.location.href = `${baseUrl}/auth/google`;
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { loginWithGoogleToken } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(searchParams.get('error'));
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Exchange Google token for API token
+      await loginWithGoogleToken(credentialResponse.credential);
+      
+      // Redirect to protected page
+      navigate('/linkedinsearch');
+    } catch (error) {
+      console.error('Google login error:', error);
+      setError('Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google authentication failed. Please try again.');
   };
 
   return (
@@ -35,6 +62,11 @@ const LoginPage: React.FC = () => {
             borderRadius: 2,
           }}
         >
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
+              {error}
+            </Alert>
+          )}
           <Avatar
             sx={{
               width: 80,
@@ -45,27 +77,18 @@ const LoginPage: React.FC = () => {
           >
             <GoogleIcon sx={{ fontSize: 40 }} />
           </Avatar>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<GoogleIcon />}
-            onClick={handleGoogleLogin}
-            sx={{
-              backgroundColor: '#4285f4',
-              color: 'white',
-              px: 4,
-              py: 1.5,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontSize: '1.1rem',
-              fontWeight: 500,
-              '&:hover': {
-                backgroundColor: '#3367d6',
-              },
-            }}
-          >
-            Sign in with Google
-          </Button>
+          {loading ? (
+            <CircularProgress size={40} />
+          ) : (
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="filled_blue"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+            />
+          )}
         </Paper>
       </Box>
     </Container>

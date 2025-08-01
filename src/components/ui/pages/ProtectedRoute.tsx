@@ -1,35 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { CircularProgress, Box } from '@mui/material';
-import { apiService } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { isAuthenticated, loading } = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Try to make an API call to check if user is authenticated
-        await apiService.getBusinessModels(); // or any protected endpoint
-        setIsAuthenticated(true);
-      } catch (error: any) {
-        if (error.message.includes('401') || error.message.includes('Not authenticated')) {
-          setIsAuthenticated(false);
-        } else {
-          // Other errors (network, etc.) - assume not authenticated
-          setIsAuthenticated(false);
-        }
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
+  if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />

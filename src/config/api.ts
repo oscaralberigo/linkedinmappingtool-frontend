@@ -8,6 +8,9 @@ interface ApiConfig {
     savedSearches: string;
     employeeCountRange: string;
     locations: string;
+    validateGoogleToken: string;
+    validateToken: string;
+    logout: string;
   };
 }
 const getApiConfig = (): ApiConfig => {
@@ -21,6 +24,9 @@ const getApiConfig = (): ApiConfig => {
     savedSearches: '/api/saved-searches',
     employeeCountRange: '/api/employee-count-range',
     locations: '/api/locations',
+    validateGoogleToken: '/auth/validate-google-token',
+    validateToken: '/auth/validate',
+    logout: '/auth/logout',
   };
   // Only base URL changes per environment
   const baseUrls: Record<string, string> = {

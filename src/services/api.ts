@@ -14,12 +14,16 @@ import {
 import { Company } from '../types/company';
 
 class ApiService {
+  private getAuthToken(): string | null {
+    return localStorage.getItem('auth_token');
+  }
+
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     let url: string;
-    
+        
     // Check if endpoint is a full URL or just a key
     if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
       // It's already a full URL
@@ -27,10 +31,16 @@ class ApiService {
     } else {
       // Handle query parameters in the endpoint string
       const [endpointKey, queryString] = endpoint.split('?');
+      
       const baseUrl = getApiUrl(endpointKey as any);
+      
       url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
     }
-
+    
+    
+    // Get auth token
+    const token = this.getAuthToken();
+    
     // Ensure headers is a plain object with string keys and values
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -40,10 +50,14 @@ class ApiService {
           )
         : {}),
     };
+
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     
     const defaultOptions: RequestInit = {
       headers,
-      credentials: 'include', // <-- This ensures cookies are sent!
     };
 
     const response = await fetch(url, {
@@ -52,6 +66,13 @@ class ApiService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        // Token expired or invalid, clear it
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        // Redirect to login
+        window.location.href = '/';
+      }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
@@ -106,7 +127,6 @@ class ApiService {
     });
     
     const url = `searchLinkedinIds?${queryParams}`;
-    console.log('Making API call to:', url); // Debug log
     
     const data = await this.makeRequest<any[]>(url, {
       method: 'GET',
@@ -137,18 +157,25 @@ class ApiService {
   }
 
   async getSavedSearchById(id: number): Promise<{ companies: Company[]; keywords: string }> {
+    
+    // Get the base URL for savedSearches
     const baseUrl = getApiUrl('savedSearches');
     const url = `${baseUrl}/${id}`;
-
+        
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getAuthToken()}`,
       },
-      credentials: 'include',
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        window.location.href = '/';
+      }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
@@ -156,8 +183,8 @@ class ApiService {
     
     // Map the API response to Company interface and extract keywords
     const companies = data.companies?.map((company: any) => ({
-      id: company.company_id, // Map company_id to id
-      name: company.company_name, // Map company_name to name
+      id: company.company_id,
+      name: company.company_name,
       linkedin_id: company.linkedin_id,
       linkedin_page: company.linkedin_page,
       added_manually: false
@@ -172,6 +199,19 @@ class ApiService {
   async deleteSavedSearch(id: number): Promise<{ message: string }> {
     return this.makeRequest<{ message: string }>(`savedSearches/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  // Auth methods
+  async validateToken(): Promise<{ valid: boolean; user?: any }> {
+    return this.makeRequest<{ valid: boolean; user?: any }>('validateToken', {
+      method: 'GET',
+    });
+  }
+
+  async logout(): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>('logout', {
+      method: 'POST',
     });
   }
 }
