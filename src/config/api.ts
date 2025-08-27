@@ -1,4 +1,4 @@
-interface ApiConfig {
+export interface ApiConfig {
   baseUrl: string;
   endpoints: {
     businessModels: string;
@@ -11,6 +11,8 @@ interface ApiConfig {
     validateGoogleToken: string;
     validateToken: string;
     logout: string;
+    advertProcess: string;
+    createBox: string; // New endpoint for creating a box
   };
 }
 const getApiConfig = (): ApiConfig => {
@@ -27,6 +29,8 @@ const getApiConfig = (): ApiConfig => {
     validateGoogleToken: '/auth/validate-google-token',
     validateToken: '/auth/validate',
     logout: '/auth/logout',
+    advertProcess: '/api/advert/process',
+    createBox: '/api/boxes/pipeline/:pipelineKey/create-and-update'
   };
   // Only base URL changes per environment
   const baseUrls: Record<string, string> = {

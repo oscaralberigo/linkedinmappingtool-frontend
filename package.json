@@ -24,7 +24,7 @@
     "build:dev": "react-scripts build",
     "build:test": "react-scripts build",
     "build:prod": "react-scripts build",
-    "start:dev": "react-scripts start",
+    "start:dev": "PORT=3003 react-scripts start",
     "start:test": "react-scripts start",
     "start:prod": "react-scripts start",
     "test": "react-scripts test",

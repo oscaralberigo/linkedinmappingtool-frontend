@@ -40,4 +40,11 @@ export interface ApiErrorResponse {
   message: string;
   status: number;
   timestamp: string;
+}
+
+export interface CreateBoxRequest {
+  name: string;
+  notes: string;
+  stageKey: string;
+  fields: Record<string, any>; // Assuming fields can be any key-value pairs
 } 

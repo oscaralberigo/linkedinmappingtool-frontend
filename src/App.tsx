@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import LoginPage from './components/ui/pages/LoginPage';
 import LinkedInSearch from './components/ui/pages/LinkedInSearch';
+import AdvertProcessingPage from './components/ui/pages/AdvertProcessingPage';
 import ProtectedRoute from './components/ui/pages/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -34,6 +35,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <LinkedInSearch />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/advertprocessing" 
+                element={
+                  <ProtectedRoute>
+                    <AdvertProcessingPage />
                   </ProtectedRoute>
                 } 
               />
