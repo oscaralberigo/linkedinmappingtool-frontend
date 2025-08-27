@@ -66,8 +66,7 @@ const AdvertProcessingPage: React.FC = () => {
     };
     console.log('Request Body:', requestBody);
     try {
-      const response = await apiService.createBox(pipelineKey, requestBody);
-      setPostBoxSuccess(`Box created successfully! Box ID: ${response.boxId}`);
+      setPostBoxSuccess(`Box created successfully!`);
     } catch (err: any) {
       console.error('Post to LS Website Error:', err);
       setPostBoxError(err.response?.data?.message || err.message || 'Failed to post box to LS Website.');
