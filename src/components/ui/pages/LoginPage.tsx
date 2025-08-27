@@ -28,8 +28,8 @@ const LoginPage: React.FC = () => {
       // Exchange Google token for API token
       await loginWithGoogleToken(credentialResponse.credential);
       
-      // Redirect to protected page
-      navigate('/linkedinsearch');
+      // Redirect to home page (will show dashboard for authenticated users)
+      navigate('/');
     } catch (error) {
       console.error('Google login error:', error);
       setError('Authentication failed. Please try again.');

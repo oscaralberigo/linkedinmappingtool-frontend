@@ -6,6 +6,7 @@ import LoginPage from './components/ui/pages/LoginPage';
 import LinkedInSearch from './components/ui/pages/LinkedInSearch';
 import AdvertProcessingPage from './components/ui/pages/AdvertProcessingPage';
 import ProtectedRoute from './components/ui/pages/ProtectedRoute';
+import RootRedirect from './components/ui/pages/RootRedirect';
 import { AuthProvider } from './contexts/AuthContext';
 
 const theme = createTheme({
@@ -29,22 +30,23 @@ function App() {
         <AuthProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<LoginPage />} />
-              <Route 
-                path="/linkedinsearch" 
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/linkedinsearch"
                 element={
                   <ProtectedRoute>
                     <LinkedInSearch />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/advertprocessing" 
+              <Route
+                path="/advertprocessing"
                 element={
                   <ProtectedRoute>
                     <AdvertProcessingPage />
                   </ProtectedRoute>
-                } 
+                }
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
