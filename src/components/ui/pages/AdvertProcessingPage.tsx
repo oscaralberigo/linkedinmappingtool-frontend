@@ -5,6 +5,7 @@ import { CreateBoxRequest } from '../../../types/api';
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Info as InfoIcon } from '@mui/icons-material';
+import { getFieldKey } from '../../../config/fieldMappings';
 
 
 
@@ -60,12 +61,12 @@ const AdvertProcessingPage: React.FC = () => {
     };
 
     const fieldsPayload: Record<string, any> = {
-      '1001': advertData.jobTitle + ',' + advertData.companyDescriptor,
-      '1002': advertData.blurb,
-      '1003': formatListAsHtml(advertData.requirements, 'Requirements'),
-      '1005': formatListAsHtml(advertData.responsibilities, 'Responsibilities'),
-      '1008': "Competitive",
-      '1009': advertData.location,
+      [getFieldKey('ROLE_TITLE')]: advertData.jobTitle + ',' + advertData.companyDescriptor,
+      [getFieldKey('DESCRIPTION')]: advertData.blurb,
+      [getFieldKey('REQUIREMENTS')]: formatListAsHtml(advertData.requirements, 'Requirements'),
+      [getFieldKey('RESPONSIBILITIES')]: formatListAsHtml(advertData.responsibilities, 'Responsibilities'),
+      [getFieldKey('SALARY')]: "Competitive",
+      [getFieldKey('LOCATION')]: advertData.location,
     };
     const requestBody: CreateBoxRequest = {
       name: advertData.jobTitle,
