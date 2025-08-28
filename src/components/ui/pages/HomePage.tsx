@@ -42,15 +42,21 @@ const HomePage: React.FC = () => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <img
-            src="/ls-logo-black.png"
-            alt="Logan Sinclair"
-            style={{
-              maxWidth: '150px',
-              height: 'auto',
-              display: 'block'
-            }}
-          />
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <img
+              src="/ls-logo-black.png"
+              alt="Logan Sinclair"
+              style={{
+                maxWidth: '150px',
+                height: 'auto',
+                display: 'block',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            />
+          </Link>
         </Box>
         <Button
           variant="outlined"

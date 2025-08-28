@@ -9,11 +9,14 @@ export const useSearch = (companyList: Company[]) => {
   const [error, setError] = useState<string | null>(null);
 
   const searchCompanies = async (filters: SearchFilters) => {
+    console.log("Running search");
     setLoading(true);
     setError(null);
     try {
+      console.log('filters', filters);
       const results = await apiService.searchCompaniesLinkedInIds(filters);
       // Simple merge logic: keep existing manually added companies, add new search results
+      console.log('results', results);
       const manual = companyList.filter(c => c.added_manually);
       const upgraded = results.map(result => {
         const manualMatch = manual.find(m => m.id === result.id);

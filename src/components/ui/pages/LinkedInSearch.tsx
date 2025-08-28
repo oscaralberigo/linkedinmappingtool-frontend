@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button as MuiButton, Snackbar, Alert, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
 import CompanyList from '../sections/CompanyList';
 import { useCompanies } from '../../../hooks/useCompanies';
 import LoadSavedSearch from '../sections/LoadSavedSearch';
@@ -7,7 +8,6 @@ import CreateNewSearch from '../sections/CreateNewSearch';
 import { apiService } from '../../../services/api';
 import { LinkedInUrlFormatter } from '../../../utils/linkedInUrlFormatter';
 import { useSearch } from '../../../hooks/useSearch';
-import { useLocations } from '../../../hooks/useLocations';
 import { Company } from '../../../types/company';
 
 const LinkedInSearch: React.FC = () => {
@@ -147,15 +147,21 @@ const LinkedInSearch: React.FC = () => {
         >
           {/* Logo */}
           <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'grey.200' }}>
-            <img 
-              src="/ls-logo-black.png" 
-              alt="Logan Sinclair" 
-              style={{ 
-                maxWidth: '200px', 
-                height: 'auto',
-                display: 'block'
-              }} 
-            />
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <img
+                src="/ls-logo-black.png"
+                alt="Logan Sinclair"
+                style={{
+                  maxWidth: '200px',
+                  height: 'auto',
+                  display: 'block',
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s ease'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+                onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+              />
+            </Link>
           </Box>
 
           {/* Load Saved Search */}

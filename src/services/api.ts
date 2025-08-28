@@ -1,5 +1,4 @@
 import { getApiUrl } from '../config/api';
-import type { ApiConfig } from '../config/api';
 import {
   BusinessModelsResponse,
   LinkedInIdsRequest,
@@ -15,7 +14,6 @@ import {
 } from '../types/search';
 import { Company } from '../types/company';
 import { AdvertData } from '../types/advert';
-
 class ApiService {
   private getAuthToken(): string | null {
     return localStorage.getItem('auth_token');
@@ -62,55 +60,43 @@ class ApiService {
   }
 
   private async makeRequest<T>(
-    endpointKeyOrUrl: keyof ApiConfig['endpoints'] | string,
-    options: Omit<RequestInit, 'body' | 'headers'> & { body?: unknown; headers?: HeadersInit } = {},
-    pathParams: Record<string, string> = {}
+    endpoint: string,
+    options: RequestInit = {}
   ): Promise<T> {
     let url: string;
-        
-    // If endpointKeyOrUrl is a full URL, use it directly (e.g., for external APIs)
-    if (typeof endpointKeyOrUrl === 'string' && (endpointKeyOrUrl.startsWith('http://') || endpointKeyOrUrl.startsWith('https://'))) {
-      url = endpointKeyOrUrl;
+    
+    // Check if endpoint is a full URL or just a key
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      // It's already a full URL
+      url = endpoint;
     } else {
-      // For configured API endpoints, use getApiUrl and apply path params
-      let endpointPath = getApiUrl(endpointKeyOrUrl as keyof ApiConfig['endpoints']);
-
-      for (const key in pathParams) {
-        endpointPath = endpointPath.replace(`:${key}`, pathParams[key]);
-      }
-      url = endpointPath;
-    }
-    
-    const token = this.getAuthToken();
-
-    const initialHeaders: Record<string, string> = {};
-
-    if (token) {
-      initialHeaders['Authorization'] = `Bearer ${token}`;
+      // Handle query parameters in the endpoint string
+      const [endpointKey, queryString] = endpoint.split('?');
+      const baseUrl = getApiUrl(endpointKey as any);
+      url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
     }
 
-    const normalizedOptionsHeaders = this._normalizeHeaders(options.headers);
-    const mergedHeaders = { ...initialHeaders, ...normalizedOptionsHeaders };
-
-    const { body: finalBody, headers: finalHeaders } = this._processRequestOptions(options, mergedHeaders);
+    // Ensure headers is a plain object with string keys and values
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers
+        ? Object.fromEntries(
+            Object.entries(options.headers).map(([k, v]) => [k, String(v)])
+          )
+        : {}),
+    };
     
-    const finalOptions: RequestInit = {
-      ...options,
-      headers: finalHeaders,
-      body: finalBody,
+    const defaultOptions: RequestInit = {
+      headers,
+      // credentials: 'include', // <-- Commented out to avoid CORS issues
     };
 
     const response = await fetch(url, {
-      ...finalOptions,
-      method: options.method,
+      ...defaultOptions,
+      ...options,
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
-        window.location.href = '/';
-      }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
@@ -152,9 +138,11 @@ class ApiService {
     });
   }
 
+  // New dynamic search method
   async searchCompaniesLinkedInIds(filters: SearchFilters): Promise<Company[]> {
     const queryParams = new URLSearchParams();
     
+    // Add filters to query params
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         queryParams.append(key, String(value));
@@ -162,11 +150,13 @@ class ApiService {
     });
     
     const url = `searchLinkedinIds?${queryParams}`;
+    console.log('Making API call to:', url); // Debug log
     
     const data = await this.makeRequest<any[]>(url, {
       method: 'GET',
     });
     
+    // Map the API response to Company interface
     return data.map((company: any) => ({
       id: company.id,
       name: company.company_name || company.name,
@@ -190,9 +180,36 @@ class ApiService {
   }
 
   async getSavedSearchById(id: number): Promise<{ companies: Company[]; keywords: string }> {
-    return this.makeRequest<{ companies: Company[]; keywords: string }>('savedSearches', {
+    const baseUrl = getApiUrl('savedSearches');
+    const url = `${baseUrl}/${id}`;
+
+    const response = await fetch(url, {
       method: 'GET',
-    }, { id: id.toString() });
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // credentials: 'include', // <-- Commented out to avoid CORS issues
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // Map the API response to Company interface and extract keywords
+    const companies = data.companies?.map((company: any) => ({
+      id: company.company_id, // Map company_id to id
+      name: company.company_name, // Map company_name to name
+      linkedin_id: company.linkedin_id,
+      linkedin_page: company.linkedin_page,
+      added_manually: false
+    })) || [];
+    
+    return {
+      companies,
+      keywords: data.keywords || ''
+    };
   }
 
   async deleteSavedSearch(id: number): Promise<{ message: string }> {
@@ -214,17 +231,37 @@ class ApiService {
   }
 
   async processAdvert(formData: FormData): Promise<AdvertData> {
-    return this.makeRequest<AdvertData>('advertProcess', {
+    const baseUrl = getApiUrl('advertProcess');
+
+    const response = await fetch(baseUrl, {
       method: 'POST',
       body: formData,
     });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
   }
 
   async createBox(pipelineKey: string, requestBody: CreateBoxRequest): Promise<{ message: string; boxId: string }> {
-    return this.makeRequest<{ message: string; boxId: string }>('createBox', {
+    const baseUrl = getApiUrl('createBox');
+    const url = `${baseUrl.replace(':pipelineKey', pipelineKey)}`;
+
+    const response = await fetch(url, {
       method: 'POST',
-      body: requestBody,
-    }, { pipelineKey });
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
   }
 }
 

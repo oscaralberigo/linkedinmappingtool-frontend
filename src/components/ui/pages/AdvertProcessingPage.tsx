@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { apiService } from '../../../services/api';
 import { AdvertData } from '../../../types/advert';
 import { CreateBoxRequest } from '../../../types/api';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { Info as InfoIcon } from '@mui/icons-material';
 
 
 
@@ -46,8 +48,15 @@ const AdvertProcessingPage: React.FC = () => {
     setIsPostingBox(true);
     setPostBoxError(null);
     setPostBoxSuccess(null);
+
+    // Helper function to filter out empty lines
+    const filterEmptyLines = (items: string[]) => {
+      return items.filter(item => item.trim().length > 0);
+    };
+
     const formatListAsHtml = (items: string[], title: string) => {
-      return `<p>${title}:</p><ul>${items.map(item => `<li>${item}</li>`).join('')}</ul>`;
+      const filteredItems = filterEmptyLines(items);
+      return `<p>${title}:</p><ul>${filteredItems.map(item => `<li>${item.trim()}</li>`).join('')}</ul>`;
     };
 
     const fieldsPayload: Record<string, any> = {
@@ -66,6 +75,7 @@ const AdvertProcessingPage: React.FC = () => {
     };
     console.log('Request Body:', requestBody);
     try {
+      const response = await apiService.createBox(pipelineKey, requestBody);
       setPostBoxSuccess(`Box created successfully!`);
     } catch (err: any) {
       console.error('Post to LS Website Error:', err);
@@ -86,15 +96,21 @@ const AdvertProcessingPage: React.FC = () => {
       <div style={{ width: '100%', padding: '0rem', backgroundColor: '#f8f9fa', borderBottom: '1px solid #e0e0e0', boxSizing: 'border-box'  }}>
         {/* Logo */}
         <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'grey.200' }}>
-          <img 
-            src="/ls-logo-black.png" 
-            alt="Logan Sinclair" 
-            style={{ 
-              maxWidth: '200px', 
-              height: 'auto',
-              display: 'block'
-            }} 
-          />
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <img
+              src="/ls-logo-black.png"
+              alt="Logan Sinclair"
+              style={{
+                maxWidth: '200px',
+                height: 'auto',
+                display: 'block',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            />
+          </Link>
         </Box>
         <div style={{ backgroundColor: 'white', padding: '1.5rem', margin: '1.5rem', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '1rem' }}>
           <div style={{ marginBottom: '1.5rem' }}>
@@ -112,7 +128,7 @@ const AdvertProcessingPage: React.FC = () => {
         </div>
       </div>
       <div style={{ width: '100%', padding: '2rem', backgroundColor: 'white', display: 'flex', flexDirection: 'column', height: '100vh', boxSizing: 'border-box' }}>
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '2rem', color: '#333' }}>Generated Advert</h2>
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '2rem', color: '#333' }}>AI Generated Advert</h2>
         {isLoading && <div style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>Processing advert... This make take up to 1 minute, go grab a coffee.</div>}
         {!advertData && !isLoading && <div style={{ textAlign: 'center', padding: '3rem', color: '#999', fontStyle: 'italic' }}>Upload a file and click "Generate Advert" to see results here</div>}
         {advertData && (
@@ -155,8 +171,14 @@ const AdvertProcessingPage: React.FC = () => {
                     style={{ ...commonTextareaStyle, minHeight: '100px' } as const} 
                   />
                 </div>
-                <div style={{ marginBottom: '1rem' }}>
+                <div style={{ marginBottom: '1.5rem' }}>
                   <label style={commonLabelStyle}>Responsibilities</label>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                    <InfoIcon sx={{ fontSize: 16, color: '#666' }} />
+                    <Typography variant="caption" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                      Add responsibilities as a list, with each responsibility on a new line.
+                    </Typography>
+                  </Box>
                   <textarea
                     value={advertData.responsibilities.join('\n')}
                     onChange={(e) => {
@@ -175,9 +197,16 @@ const AdvertProcessingPage: React.FC = () => {
                     rows={Math.max(5, advertData.responsibilities.length * 2)}
                     style={commonTextareaStyle}
                   />
+                  
                 </div>
                 <div style={{ marginBottom: '2rem' }}>
                   <label style={commonLabelStyle}>Requirements</label>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                    <InfoIcon sx={{ fontSize: 16, color: '#666' }} />
+                    <Typography variant="caption" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                      Add requirements as a list, with each requirement on a new line.
+                    </Typography>
+                  </Box>
                   <textarea
                     value={advertData.requirements.join('\n')}
                     onChange={(e) => {
@@ -196,6 +225,7 @@ const AdvertProcessingPage: React.FC = () => {
                     rows={Math.max(5, advertData.requirements.length * 2)}
                     style={commonTextareaStyle}
                   />
+                  
                 </div>
               </div>
             </div>
