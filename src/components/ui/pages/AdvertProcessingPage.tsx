@@ -15,6 +15,7 @@ const AdvertProcessingPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [advertData, setAdvertData] = useState<AdvertData | null>(null);
+  const [postingCompany, setPostingCompany] = useState<string>('LS Website');
   const [pipelineKey] = useState<string>(getPipelineKey('000 Adverts'));
   const [boxStageKey] = useState<string>('5001');
   const [isPostingBox, setIsPostingBox] = useState<boolean>(false);
@@ -73,11 +74,15 @@ const AdvertProcessingPage: React.FC = () => {
 
     const formatListAsHtml = (items: string[], title: string) => {
       const filteredItems = filterEmptyLines(items);
-      return `<p>${title}:</p><ul>${filteredItems.map(item => `<li>${item.trim()}</li>`).join('')}</ul>`;
+      if (postingCompany === 'LS Website') {
+        return `<ul>${filteredItems.map(item => `<li>${item.trim()}</li>`).join('')}</ul>`;
+      } else {
+        return `<p>${title}:</p><ul>${filteredItems.map(item => `<li>${item.trim()}</li>`).join('')}</ul>`;
+      }
     };
 
     const fieldsPayload: Record<string, any> = {
-      [getFieldKey('ROLE_TITLE')]: advertData.jobTitle + ',' + advertData.companyDescriptor,
+      [getFieldKey('ROLE_TITLE')]: advertData.jobTitle + ', ' + advertData.companyDescriptor,
       [getFieldKey('DESCRIPTION')]: advertData.blurb,
       [getFieldKey('REQUIREMENTS')]: formatListAsHtml(advertData.requirements, 'Requirements'),
       [getFieldKey('RESPONSIBILITIES')]: formatListAsHtml(advertData.responsibilities, 'Responsibilities'),
@@ -86,7 +91,7 @@ const AdvertProcessingPage: React.FC = () => {
     };
     const requestBody: CreateBoxRequest = {
       name: advertData.jobTitle,
-      notes: advertData.blurb || '',
+      notes: '',
       stageKey: boxStageKey,
       fields: fieldsPayload,
     };
