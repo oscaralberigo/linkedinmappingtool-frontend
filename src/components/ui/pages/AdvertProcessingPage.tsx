@@ -10,7 +10,7 @@ import { getFieldKey, getPipelineKey} from '../../../config/fieldMappings';
 
 
 const AdvertProcessingPage: React.FC = () => {
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfFiles, setPdfFiles] = useState<File[]>([]);
   const [briefingNotes, setBriefingNotes] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,16 +21,30 @@ const AdvertProcessingPage: React.FC = () => {
   const [postBoxError, setPostBoxError] = useState<string | null>(null);
   const [postBoxSuccess, setPostBoxSuccess] = useState<string | null>(null);
 
+  // Helper function to check if a file is already selected
+  const isFileAlreadySelected = (newFile: File, existingFiles: File[]): boolean => {
+    return existingFiles.some(existingFile =>
+      existingFile.name === newFile.name &&
+      existingFile.size === newFile.size &&
+      existingFile.lastModified === newFile.lastModified
+    );
+  };
+
   const handleSubmit = async () => {
-    if (!pdfFile) {
-      setError('Please upload a PDF file.');
+    if (pdfFiles.length === 0) {
+      setError('Please upload at least one PDF file.');
       return;
     }
     setIsLoading(true);
     setError(null);
     setAdvertData(null);
     const formData = new FormData();
-    formData.append('pdf', pdfFile as File);
+
+    // Append all PDF files
+    pdfFiles.forEach((file, index) => {
+      formData.append('pdf', file);
+    });
+
     if (briefingNotes) formData.append('briefingNotes', briefingNotes);
     try {
       setAdvertData(await apiService.processAdvert(formData));
@@ -117,14 +131,93 @@ const AdvertProcessingPage: React.FC = () => {
         </Box>
         <div style={{ backgroundColor: 'white', padding: '1.5rem', margin: '1.5rem', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '1rem' }}>
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontSize: '1rem', fontWeight: 500, color: '#333', marginBottom: '0.5rem' }}>Upload Job Advert PDF</label>
-            <input type="file" accept=".pdf" required onChange={(e) => setPdfFile(e.target.files ? e.target.files[0] : null)} style={{ width: '100%', padding: '0.5rem', border: '2px dashed #ccc', borderRadius: '4px', fontSize: '0.9rem', color: '#666' }} />
+            <label style={{ display: 'block', fontSize: '1rem', fontWeight: 500, color: '#333', marginBottom: '0.5rem' }}>Upload Job Advert PDFs</label>
+            <input
+              type="file"
+              accept=".pdf"
+              multiple
+              onChange={(e) => {
+                const newFiles = Array.from(e.target.files || []);
+                setPdfFiles(prevFiles => {
+                  // Filter out files that are already selected
+                  const uniqueNewFiles = newFiles.filter(newFile =>
+                    !isFileAlreadySelected(newFile, prevFiles)
+                  );
+
+                  // Add the unique new files to the existing selection
+                  return [...prevFiles, ...uniqueNewFiles];
+                });
+
+                // Reset the input so user can select the same files again if needed
+                e.target.value = '';
+              }}
+              style={{ width: '100%', padding: '0.5rem', border: '2px dashed #ccc', borderRadius: '4px', fontSize: '0.9rem', color: '#666' }}
+            />
+            {pdfFiles.length > 0 && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
+                  {pdfFiles.length} file{pdfFiles.length > 1 ? 's' : ''} selected
+                </div>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  {pdfFiles.map((file, index) => (
+                    <div key={`${file.name}-${file.size}-${file.lastModified}`} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.25rem 0.5rem',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '4px',
+                      marginBottom: '0.25rem',
+                      fontSize: '0.75rem'
+                    }}>
+                      <span style={{ color: '#333', flex: 1 }}>{file.name}</span>
+                      <button
+                        onClick={() => {
+                          setPdfFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+                        }}
+                        style={{
+                          color: '#dc3545',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          padding: '0 0.25rem',
+                          marginLeft: '0.5rem'
+                        }}
+                        title="Remove file"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setPdfFiles([])}
+                  style={{
+                    fontSize: '0.75rem',
+                    color: '#007bff',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    padding: '0'
+                  }}
+                >
+                  Clear all files
+                </button>
+              </div>
+            )}
+            {pdfFiles.length === 0 && (
+              <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#999' }}>
+                Select PDF files - you can add more files by selecting again. Each selection adds to your current list.
+              </div>
+            )}
           </div>
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', fontSize: '1rem', fontWeight: 500, color: '#333', marginBottom: '0.5rem' }}>Optional Role Briefing Notes</label>
             <textarea value={briefingNotes} onChange={(e) => setBriefingNotes(e.target.value)} placeholder="Paste in your briefing notes here..." rows={5} style={{ width: '100%', padding: '0.75rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.9rem', resize: 'vertical' }} />
           </div>
-          <button onClick={handleSubmit} disabled={isLoading || !pdfFile} style={{ width: '100%', padding: '0.75rem 1.5rem', backgroundColor: isLoading || !pdfFile ? '#ccc' : '#007bff', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', fontWeight: 500, cursor: isLoading || !pdfFile ? 'not-allowed' : 'pointer', transition: 'background-color 0.2s' }} onMouseOver={(e) => { if (!isLoading && pdfFile) e.currentTarget.style.backgroundColor = '#0056b3'; }} onMouseOut={(e) => { if (!isLoading && pdfFile) e.currentTarget.style.backgroundColor = '#007bff'; }}>
+          <button onClick={handleSubmit} disabled={isLoading || pdfFiles.length === 0} style={{ width: '100%', padding: '0.75rem 1.5rem', backgroundColor: isLoading || pdfFiles.length === 0 ? '#ccc' : '#007bff', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', fontWeight: 500, cursor: isLoading || pdfFiles.length === 0 ? 'not-allowed' : 'pointer', transition: 'background-color 0.2s' }} onMouseOver={(e) => { if (!isLoading && pdfFiles.length > 0) e.currentTarget.style.backgroundColor = '#0056b3'; }} onMouseOut={(e) => { if (!isLoading && pdfFiles.length > 0) e.currentTarget.style.backgroundColor = '#007bff'; }}>
             {isLoading ? 'Processing...' : 'Generate Advert'}
           </button>
           {error && <div style={errorStyle}>Error: {error}</div>}

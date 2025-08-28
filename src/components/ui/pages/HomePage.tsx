@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
       color: '#0077b5'
     },
     {
-      title: 'Auto Advert',
+      title: 'Advert Posting',
       description: 'Generate and automatically post job adverts to Efin and the Logan Sinclair website',
       path: '/advertprocessing',
       color: '#28a745'
@@ -124,22 +124,6 @@ const HomePage: React.FC = () => {
               }}
             >
               <CardContent sx={{ flex: 1, padding: '2rem' }}>
-                <Box
-                  sx={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '12px',
-                    backgroundColor: page.color,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '1.5rem'
-                  }}
-                >
-                  <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold' }}>
-                    {page.title.charAt(0)}
-                  </Typography>
-                </Box>
                 <Typography
                   variant="h5"
                   sx={{
