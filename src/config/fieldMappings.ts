@@ -21,6 +21,20 @@ export const FIELD_MAPPINGS = {
   },
 };
 
+export const pipelineKeys = {
+    production: {'000 Adverts': 'agxzfm1haWxmb29nYWVyOAsSDE9yZ2FuaXphdGlvbiIRbG9nYW5zaW5jbGFpci5jb20MCxIIV29ya2Zsb3cYgIC5rqyUlwkM'},
+    development: {'000 Adverts': 'agxzfm1haWxmb29nYWVyOAsSDE9yZ2FuaXphdGlvbiIRbG9nYW5zaW5jbGFpci5jb20MCxIIV29ya2Zsb3cYgIDF467PogkM'},
+}
+
+export const getPipelineKey = (pipelineName: string) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isStaging = process.env.REACT_APP_ENV === 'staging';
+  if (isProduction || isStaging) {
+    return pipelineKeys.production[pipelineName as keyof typeof pipelineKeys.production];
+  }
+  return pipelineKeys.development[pipelineName as keyof typeof pipelineKeys.development];
+}
+
 // Get current environment field mapping
 export const getFieldMapping = () => {
   const isProduction = process.env.NODE_ENV === 'production';

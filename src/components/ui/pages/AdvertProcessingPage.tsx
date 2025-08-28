@@ -5,7 +5,7 @@ import { CreateBoxRequest } from '../../../types/api';
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Info as InfoIcon } from '@mui/icons-material';
-import { getFieldKey } from '../../../config/fieldMappings';
+import { getFieldKey, getPipelineKey} from '../../../config/fieldMappings';
 
 
 
@@ -15,7 +15,7 @@ const AdvertProcessingPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [advertData, setAdvertData] = useState<AdvertData | null>(null);
-  const [pipelineKey] = useState<string>('agxzfm1haWxmb29nYWVyOAsSDE9yZ2FuaXphdGlvbiIRbG9nYW5zaW5jbGFpci5jb20MCxIIV29ya2Zsb3cYgIC5rqyUlwkM');
+  const [pipelineKey] = useState<string>(getPipelineKey('000 Adverts'));
   const [boxStageKey] = useState<string>('5001');
   const [isPostingBox, setIsPostingBox] = useState<boolean>(false);
   const [postBoxError, setPostBoxError] = useState<string | null>(null);
@@ -49,6 +49,8 @@ const AdvertProcessingPage: React.FC = () => {
     setIsPostingBox(true);
     setPostBoxError(null);
     setPostBoxSuccess(null);
+
+    console.log('pipelineKey', pipelineKey);
 
     // Helper function to filter out empty lines
     const filterEmptyLines = (items: string[]) => {
