@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { apiService } from '../../../services/api';
 import { AdvertData } from '../../../types/advert';
 import { CreateBoxRequest } from '../../../types/api';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Switch } from '@mui/material';
+import Button from '../atoms/Button';
 import { Link } from 'react-router-dom';
 import { Info as InfoIcon } from '@mui/icons-material';
-import { getFieldKey, getPipelineKey} from '../../../config/fieldMappings';
+import { getFieldKey, getPipelineKey } from '../../../config/fieldMappings';
 
 
 
@@ -21,6 +22,11 @@ const AdvertProcessingPage: React.FC = () => {
   const [isPostingBox, setIsPostingBox] = useState<boolean>(false);
   const [postBoxError, setPostBoxError] = useState<string | null>(null);
   const [postBoxSuccess, setPostBoxSuccess] = useState<string | null>(null);
+
+  // Toggle states
+  const [employmentType, setEmploymentType] = useState<'permanent' | 'contract'>('permanent');
+  const [workType, setWorkType] = useState<'full-time' | 'part-time'>('full-time');
+  const [postAnonymous, setPostAnonymous] = useState<boolean>(false);
 
   // Helper function to check if a file is already selected
   const isFileAlreadySelected = (newFile: File, existingFiles: File[]): boolean => {
@@ -326,7 +332,122 @@ const AdvertProcessingPage: React.FC = () => {
                     rows={Math.max(5, advertData.requirements.length * 2)}
                     style={commonTextareaStyle}
                   />
-                  
+
+                </div>
+
+                {/* Toggle Options */}
+                <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+                  <Typography variant="h6" sx={{ marginBottom: '1rem', color: '#333', fontSize: '1.1rem', fontWeight: 500 }}>
+                    Job Posting Options
+                  </Typography>
+
+                  {/* Employment Type Toggle */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <Typography variant="body2" sx={{ marginBottom: '0.5rem', color: '#555', fontWeight: 500 }}>
+                      Employment Type
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        onClick={() => setEmploymentType('permanent')}
+                        sx={{
+                          minWidth: '120px',
+                          borderColor: employmentType === 'permanent' ? '#6366f1' : '#ddd',
+                          backgroundColor: employmentType === 'permanent' ? '#6366f1' : 'transparent',
+                          color: employmentType === 'permanent' ? 'white' : '#555',
+                          '&:hover': {
+                            borderColor: '#6366f1',
+                            backgroundColor: employmentType === 'permanent' ? '#6366f1' : '#f5f5f5'
+                          }
+                        }}
+                      >
+                        Permanent
+                      </Button>
+                      <Button
+                        onClick={() => setEmploymentType('contract')}
+                        sx={{
+                          minWidth: '120px',
+                          borderColor: employmentType === 'contract' ? '#6366f1' : '#ddd',
+                          backgroundColor: employmentType === 'contract' ? '#6366f1' : 'transparent',
+                          color: employmentType === 'contract' ? 'white' : '#555',
+                          '&:hover': {
+                            borderColor: '#6366f1',
+                            backgroundColor: employmentType === 'contract' ? '#6366f1' : '#f5f5f5'
+                          }
+                        }}
+                      >
+                        Contract
+                      </Button>
+                    </Box>
+                  </div>
+
+                  {/* Work Type Toggle */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <Typography variant="body2" sx={{ marginBottom: '0.5rem', color: '#555', fontWeight: 500 }}>
+                      Work Schedule
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        onClick={() => setWorkType('full-time')}
+                        sx={{
+                          minWidth: '120px',
+                          borderColor: workType === 'full-time' ? '#6366f1' : '#ddd',
+                          backgroundColor: workType === 'full-time' ? '#6366f1' : 'transparent',
+                          color: workType === 'full-time' ? 'white' : '#555',
+                          '&:hover': {
+                            borderColor: '#6366f1',
+                            backgroundColor: workType === 'full-time' ? '#6366f1' : '#f5f5f5'
+                          }
+                        }}
+                      >
+                        Full Time
+                      </Button>
+                      <Button
+                        onClick={() => setWorkType('part-time')}
+                        sx={{
+                          minWidth: '120px',
+                          borderColor: workType === 'part-time' ? '#6366f1' : '#ddd',
+                          backgroundColor: workType === 'part-time' ? '#6366f1' : 'transparent',
+                          color: workType === 'part-time' ? 'white' : '#555',
+                          '&:hover': {
+                            borderColor: '#6366f1',
+                            backgroundColor: workType === 'part-time' ? '#6366f1' : '#f5f5f5'
+                          }
+                        }}
+                      >
+                        Part Time
+                      </Button>
+                    </Box>
+                  </div>
+
+                  {/* Post Anonymous Toggle */}
+                  <div style={{ marginBottom: '0' }}>
+                    <Typography variant="body2" sx={{ marginBottom: '0.5rem', color: '#555', fontWeight: 500 }}>
+                      Posting Options
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Typography variant="body2" sx={{ color: '#555', minWidth: '120px' }}>
+                        Post Anonymously
+                      </Typography>
+                      <Switch
+                        checked={postAnonymous}
+                        onChange={(e) => setPostAnonymous(e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: '#6366f1',
+                            '&:hover': {
+                              backgroundColor: 'rgba(99, 102, 241, 0.08)'
+                            }
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: '#6366f1'
+                          }
+                        }}
+                      />
+                      <Typography variant="caption" sx={{ color: '#777', fontSize: '0.8rem' }}>
+                        {postAnonymous ? 'Enabled' : 'Disabled'}
+                      </Typography>
+                    </Box>
+                  </div>
                 </div>
               </div>
             </div>
