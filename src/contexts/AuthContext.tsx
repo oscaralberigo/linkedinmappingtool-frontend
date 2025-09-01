@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface User {
   id: string;
   email: string;
-  name: string;
+  displayName: string;
   picture?: string;
 }
 
@@ -70,7 +70,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const { token: apiToken, user: userData } = await response.json();
-      
       setToken(apiToken);
       setUser(userData);
       localStorage.setItem('auth_token', apiToken);

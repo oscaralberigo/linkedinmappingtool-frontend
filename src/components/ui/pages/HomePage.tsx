@@ -58,7 +58,22 @@ const HomePage: React.FC = () => {
             />
           </Link>
         </Box>
-        <Button
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          {user?.displayName && (
+            <Typography
+              variant="h6"
+              sx={{
+                color: '#333',
+                fontWeight: 500,
+                fontSize: '1.1rem'
+              }}
+            >
+              Welcome, {user.displayName}
+            </Typography>
+          )}
+
+          <Button
           variant="outlined"
           onClick={logout}
           sx={{
@@ -72,6 +87,7 @@ const HomePage: React.FC = () => {
         >
           Logout
         </Button>
+        </Box>
       </Box>
 
       {/* Main Content */}
