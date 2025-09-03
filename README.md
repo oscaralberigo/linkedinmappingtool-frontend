@@ -1,4 +1,4 @@
-# Logan Sincliar Development Frontend
+# Welcome to Logan Sinclair Development Frontend Docs <br> ![js] [![React][React.js]][React-url]
 
 A React TypeScript frontend for the Logan Sinclair Development Website
 
@@ -47,8 +47,10 @@ npm run start:prod
 
 ## API Integration
 
-The application is configured to connect to your backend API running on port 3001.
+The application is configured to connect to the LSDEV backend API which is set up to run on port 3001.
 
 ## Authentication
 
-The application uses Google OAuth for authentication. Users must sign in with their Google account to access the LinkedIn search functionality.
+The application uses Google OAuth for authentication. Users must sign in with their Google account to access.
+
+You must be a part of the LS group to login.
